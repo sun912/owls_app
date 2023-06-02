@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
+import 'package:owls_app/layouts/notification_layout.dart';
+import 'package:owls_app/layouts/ruleList_layout.dart';
 
 class RightSideBarWidget extends StatefulWidget {
   const RightSideBarWidget({Key? key}) : super(key: key);
@@ -12,14 +14,16 @@ class _RightSideBarWidgetState extends State<RightSideBarWidget> {
   bool ruleListClicked = false;
   bool notificationClicked = true;
 
+  onClicked() {}
+
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
-    final _showDesktop = _size.width >= 1400;
+    final _showDesktop = _size.width >= 1000;
 
     return Column(
       children: [
-        Container(
+        SizedBox(
           width: _showDesktop ? 400 : 0,
           child: Column(
             children: [
@@ -28,60 +32,53 @@ class _RightSideBarWidgetState extends State<RightSideBarWidget> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () => setState(() {
-                        ruleListClicked = true;
-                        notificationClicked = false;
+                        ruleListClicked = false;
+                        notificationClicked = true;
                       }),
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: ruleListClicked
-                              ? const Color(0xFFCCECDF).withOpacity(0.5)
-                              : Colors.white,
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(25),
-                            topLeft: Radius.circular(25),
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Notification',
-                            style: TextStyle(
-                              color: ruleListClicked
-                                  ? primaryAncient
-                                  : Colors.black,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: notificationClicked
+                                  ? primaryLight.withAlpha(100)
+                                  : backgroundColor,
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(25),
+                                topLeft: Radius.circular(25),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Notification',
+                                style: TextStyle(
+                                  color: notificationClicked
+                                      ? primaryAncient
+                                      : Colors.black,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() {
-                        ruleListClicked = false;
-                        notificationClicked = true;
-                        // Container(
-                        //   decoration: BoxDecoration(
-                        //     color: const Color(0xFFCCECDF).withOpacity(0.5),
-                        //   ),
-                        //   height: _size.height - 50,
-                        //   width: _showDesktop ? 400 : 0,
-                        //   child: const Text(
-                        //     'Rule list',
-                        //     style: TextStyle(
-                        //       fontSize: 48,
-                        //     ),
-                        //   ),
-                        // );
-                      }),
+                      onTap: () {
+                        setState(() {
+                          ruleListClicked = true;
+                          notificationClicked = false;
+                        });
+                      },
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          color: notificationClicked
-                              ? const Color(0xFFCCECDF).withOpacity(0.5)
-                              : Colors.white,
+                          color: ruleListClicked
+                              ? primaryLight.withAlpha(100)
+                              : backgroundColor,
                           borderRadius: const BorderRadius.only(
                             topRight: Radius.circular(25),
                             topLeft: Radius.circular(25),
@@ -91,7 +88,7 @@ class _RightSideBarWidgetState extends State<RightSideBarWidget> {
                           child: Text(
                             'Rule List',
                             style: TextStyle(
-                              color: notificationClicked
+                              color: ruleListClicked
                                   ? primaryAncient
                                   : Colors.black,
                               fontSize: 24,
@@ -105,13 +102,11 @@ class _RightSideBarWidgetState extends State<RightSideBarWidget> {
                 ],
               ),
               Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFCCECDF).withOpacity(0.5),
-                ),
-                height: _size.height - 50,
-                width: _showDesktop ? 400 : 0,
-                child: Text('null'),
-              ),
+                child: ruleListClicked
+                    ? RuleListLayout(size: _size, showDesktop: _showDesktop)
+                    : NotificationLayout(
+                        size: _size, showDesktop: _showDesktop),
+              )
             ],
           ),
         ),
