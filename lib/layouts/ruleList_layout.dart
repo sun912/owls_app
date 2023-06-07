@@ -25,7 +25,9 @@ class RuleListLayout extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ElevatedButton.icon(
-                onPressed: () {}, // TODO : call the rule create layout
+                onPressed: () {
+                  Navigator.pushNamed(context, '/rules/new');
+                },
                 icon: Icon(Icons.add_circle_outline_outlined),
                 label: const Text(
                   'Add Rule',
