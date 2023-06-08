@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:owls_app/layouts/addRule_layout.dart';
 import 'package:owls_app/pages/analytics_page.dart';
 import 'package:owls_app/pages/home_page.dart';
 import 'package:owls_app/pages/questions_page.dart';
@@ -29,7 +28,6 @@ class _MyAppState extends State<MyApp> {
         '/settings': (context) => const SettingsPage(),
         '/qna': (context) => const QnAPage(),
         '/info': (context) => const UserInfoPage(),
-        '/rules/new': (context) => const AddRuleLayout(),
       },
     );
   }

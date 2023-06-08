@@ -19,7 +19,7 @@ class _AlarmItemWidgetState extends State<AlarmItemWidget> {
   late SharedPreferences prefs;
   late Timer _timer;
   bool _isStart = false;
-  bool isChecked = false;
+
   final List<AlarmItemData> itemList = [
     AlarmItemData.origin(
       itemId: "1",
@@ -113,7 +113,9 @@ class _AlarmItemWidgetState extends State<AlarmItemWidget> {
               ElevatedButton.icon(
                 onPressed: () async {
                   setState(() {
-                    isChecked = true;
+                    for (int i = 0; i < itemList.length; i++) {
+                      itemList[i].isChecked = true;
+                    }
                   });
                   final checkedAlarms = prefs.getStringList('checkedAlarms');
                   for (int i = 0; i < itemList.length; i++) {
@@ -147,7 +149,6 @@ class _AlarmItemWidgetState extends State<AlarmItemWidget> {
                 return ItemTile(
                   widget: widget,
                   itemData: itemList[index],
-                  isChecked: isChecked,
                 );
               },
               separatorBuilder: (BuildContext context, int index) =>
@@ -175,11 +176,9 @@ class ItemTile extends StatelessWidget {
     super.key,
     required this.widget,
     required this.itemData,
-    required this.isChecked,
   });
   final AlarmItemData itemData;
   final AlarmItemWidget widget;
-  final bool isChecked;
 
   @override
   Widget build(BuildContext context) {

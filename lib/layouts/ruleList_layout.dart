@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
+import 'package:owls_app/data/overlay_mixin.dart';
+import 'package:owls_app/layouts/addRule_layout.dart';
 import 'package:owls_app/widgets/ruleItem_widget.dart';
 
-class RuleListLayout extends StatelessWidget {
+class RuleListLayout extends StatefulWidget {
   final Size _size;
   final bool _showDesktop;
   const RuleListLayout({Key? key, required Size size, required showDesktop})
@@ -11,23 +13,31 @@ class RuleListLayout extends StatelessWidget {
         super(key: key);
 
   @override
+  State<RuleListLayout> createState() => _RuleListLayoutState();
+}
+
+class _RuleListLayoutState extends State<RuleListLayout>
+    with OverlayStateMixin {
+  void onButtonClick() {
+    toggleOverlay(AddRuleLayout(removeOverlay: removeOverlay));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
       decoration: const BoxDecoration(
-        color: Color(0xFFE8F5EF),
+        color: menuBar,
       ),
-      height: _size.height - 50,
-      width: _showDesktop ? 400 : 0,
+      height: widget._size.height - 50,
+      width: widget._showDesktop ? 400 : 0,
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/rules/new');
-                },
+                onPressed: onButtonClick,
                 icon: Icon(Icons.add_circle_outline_outlined),
                 label: const Text(
                   'Add Rule',
