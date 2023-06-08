@@ -48,60 +48,14 @@ class AddRuleLayout extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
-            DropdownButtonFormField2(
-              hint: const Text(
-                'Select Target',
-                style: TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-              decoration: InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  )),
-              isExpanded: true,
-              items: tags
-                  .map(
-                    (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item,
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-              validator: (value) {
-                if (value == null) {
-                  return 'Please select target.';
-                }
-                return null;
-              },
-              buttonStyleData: ButtonStyleData(
-                height: 60,
-                padding: EdgeInsets.only(
-                  left: 20,
-                  right: 10,
-                ),
-              ),
-              iconStyleData: IconStyleData(
-                icon: Icon(
-                  Icons.arrow_drop_down,
-                  color: primaryAncient,
-                ),
-                iconSize: 30,
-              ),
-              dropdownStyleData: DropdownStyleData(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+            Container(
+              height: 1000,
+              child: DropdownButtonFormField2(
+                decoration: InputDecoration(),
+                items: [],
               ),
             )
           ],
