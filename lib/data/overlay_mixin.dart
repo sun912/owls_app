@@ -12,16 +12,11 @@ mixin OverlayStateMixin<T extends StatefulWidget> on State<T> {
   Widget _dismissibleOverlay(Widget child) => Stack(
         alignment: Alignment.topRight,
         children: [
-          const Positioned(
-            child: ColoredBox(
-              color: Colors.white24,
-            ),
-          ),
           child,
         ],
       );
 
-  void _insertOverlay(Widget child) {
+  void insertOverlay(Widget child) {
     _overlayEntry = OverlayEntry(
       builder: (_) => _dismissibleOverlay(child),
     );
@@ -30,7 +25,7 @@ mixin OverlayStateMixin<T extends StatefulWidget> on State<T> {
   }
 
   void toggleOverlay(Widget child) =>
-      isOverlayShown ? removeOverlay() : _insertOverlay(child);
+      isOverlayShown ? removeOverlay() : insertOverlay(child);
 
   @override
   void dispose() {

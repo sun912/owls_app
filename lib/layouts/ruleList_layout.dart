@@ -19,7 +19,10 @@ class RuleListLayout extends StatefulWidget {
 class _RuleListLayoutState extends State<RuleListLayout>
     with OverlayStateMixin {
   void onButtonClick() {
-    toggleOverlay(AddRuleLayout(removeOverlay: removeOverlay));
+    toggleOverlay(AddRuleLayout(
+      removeOverlay: removeOverlay,
+      addOverlay: insertOverlay,
+    ));
   }
 
   @override
