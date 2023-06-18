@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
 
 class CustomDropdownPage extends StatefulWidget {
-  List<String> dropdownList;
+  final List<String> dropdownList;
   CustomDropdownPage({Key? key, required this.dropdownList}) : super(key: key);
 
   @override
@@ -16,12 +16,12 @@ class _CustomDropdownPageState extends State<CustomDropdownPage> {
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
   static const double _dropdownWidth = 300;
-  static const double _dropdownHeight = 50;
+  // static const double _dropdownHeight = 50;
 
   void _createOverlay() {
     if (_overlayEntry == null) {
       _overlayEntry = _customDropdown();
-      Overlay.of(context)?.insert(_overlayEntry!);
+      Overlay.of(context)!.insert(_overlayEntry!);
     }
   }
 
