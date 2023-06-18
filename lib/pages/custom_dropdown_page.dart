@@ -3,26 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
 
 class CustomDropdownPage extends StatefulWidget {
-  const CustomDropdownPage({Key? key}) : super(key: key);
+  List<String> dropdownList;
+  CustomDropdownPage({Key? key, required this.dropdownList}) : super(key: key);
 
   @override
   State<CustomDropdownPage> createState() => _CustomDropdownPageState();
 }
 
 class _CustomDropdownPageState extends State<CustomDropdownPage> {
-  static const List<String> _dropdownList = [
-    'One',
-    'Two',
-    'Three',
-    'Four',
-    'Five'
-  ];
-
   String _dropdownValue = 'Select rule target';
 
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
-  static const double _dropdownWidth = 200;
+  static const double _dropdownWidth = 300;
   static const double _dropdownHeight = 50;
 
   void _createOverlay() {
@@ -47,41 +40,47 @@ class _CustomDropdownPageState extends State<CustomDropdownPage> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _removeOverlay(),
-      child: Scaffold(
-        body: Center(
-          child: InkWell(
-            onTap: () {
-              _createOverlay();
-            },
-            child: CompositedTransformTarget(
-              link: _layerLink,
-              child: Container(
-                width: _dropdownWidth,
-                height: _dropdownHeight,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: primaryAncient,
-                  ),
-                  borderRadius: BorderRadius.circular(6),
+      child: InkWell(
+        onTap: () {
+          _createOverlay();
+        },
+        child: CompositedTransformTarget(
+          link: _layerLink,
+          child: Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 0,
+              ),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 15,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                border: Border.all(
+                  color: primaryAncient,
+                  width: 3.0,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _dropdownValue,
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 22 / 16,
-                        color: Colors.black,
-                      ),
+                color: backgroundColor,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    _dropdownValue,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      height: 22 / 16,
+                      color: Colors.black,
                     ),
-                    Icon(
-                      Icons.arrow_downward,
-                      size: 18,
-                    )
-                  ],
-                ),
+                  ),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                  )
+                ],
               ),
             ),
           ),
@@ -96,55 +95,62 @@ class _CustomDropdownPageState extends State<CustomDropdownPage> {
       builder: (context) => Positioned(
         width: _dropdownWidth,
         child: CompositedTransformFollower(
+          targetAnchor: Alignment.bottomCenter,
+          followerAnchor: Alignment.topCenter,
           link: _layerLink,
-          offset: const Offset(0, _dropdownHeight),
+          offset: const Offset(0, 0),
           child: Material(
-            color: Colors.white,
+            color: backgroundColor,
             child: Container(
-              height: (22.0 * _dropdownList.length) +
-                  (21 * (_dropdownList.length - 1)) +
+              alignment: Alignment.center,
+              height: (22.0 * widget.dropdownList.length) +
+                  (21 * (widget.dropdownList.length - 1)) +
                   20,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: primaryAncient, width: 3),
+                borderRadius: BorderRadius.circular(40),
               ),
-              child: ListView.separated(
-                physics: const ClampingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                itemCount: _dropdownList.length,
-                itemBuilder: (context, index) {
-                  return CupertinoButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    pressedOpacity: 1,
-                    minSize: 0,
-                    onPressed: () {
-                      setState(() {
-                        _dropdownValue = _dropdownList.elementAt(index);
-                      });
-                      _removeOverlay();
-                    },
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        _dropdownList.elementAt(index),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          height: 22 / 16,
-                          color: Colors.black,
+              child: SingleChildScrollView(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  itemCount: widget.dropdownList.length,
+                  itemBuilder: (context, index) {
+                    return CupertinoButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      pressedOpacity: 0.5,
+                      minSize: 0,
+                      onPressed: () {
+                        setState(() {
+                          _dropdownValue = widget.dropdownList.elementAt(index);
+                        });
+                        _removeOverlay();
+                      },
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          widget.dropdownList.elementAt(index),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            height: 22 / 16,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-                separatorBuilder: (context, index) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Divider(
-                      color: Colors.grey,
-                      height: 20,
-                    ),
-                  );
-                },
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Divider(
+                        color: primaryAncient,
+                        height: 20,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),

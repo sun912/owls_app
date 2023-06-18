@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
-import 'package:owls_app/data/overlay_mixin.dart';
-import 'package:owls_app/layouts/addRule_layout.dart';
-import 'package:owls_app/widgets/ruleItem_widget.dart';
+import 'package:owls_app/pages/newRule_page.dart';
+import 'package:owls_app/pages/ruleList_page.dart';
 
 class RuleListLayout extends StatefulWidget {
   final Size _size;
@@ -16,14 +15,12 @@ class RuleListLayout extends StatefulWidget {
   State<RuleListLayout> createState() => _RuleListLayoutState();
 }
 
-class _RuleListLayoutState extends State<RuleListLayout>
-    with OverlayStateMixin {
-  void onButtonClick() {
-    toggleOverlay(AddRuleLayout(
-      removeOverlay: removeOverlay,
-      addOverlay: insertOverlay,
-    ));
-  }
+class _RuleListLayoutState extends State<RuleListLayout> {
+  void onButtonClick() {}
+
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  final routeRuleList = "/";
+  final routeAddRule = "/main/rule/new";
 
   @override
   Widget build(BuildContext context) {
@@ -34,31 +31,30 @@ class _RuleListLayoutState extends State<RuleListLayout>
       ),
       height: widget._size.height - 50,
       width: widget._showDesktop ? 400 : 0,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton.icon(
-                onPressed: onButtonClick,
-                icon: Icon(Icons.add_circle_outline_outlined),
-                label: const Text(
-                  'Add Rule',
-                  style: TextStyle(color: backgroundColor),
-                ),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryAncient,
-                    padding: const EdgeInsets.all(12),
-                    shape: const StadiumBorder()),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          RuleItem()
-        ],
+      child: Navigator(
+        key: _navigatorKey,
+        initialRoute: routeRuleList,
+        onGenerateRoute: _onGenerateRoute,
       ),
     );
+  }
+
+  MaterialPageRoute _onGenerateRoute(RouteSettings setting) {
+    if (setting.name == routeRuleList) {
+      return MaterialPageRoute<dynamic>(
+          builder: (context) => RuleListPage(
+                onPress: () =>
+                    _navigatorKey.currentState?.pushNamed(routeAddRule),
+              ),
+          settings: setting);
+    } else if (setting.name == routeAddRule) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => NewRulePage(
+          onPress: () => _navigatorKey.currentState?.pushNamed(routeRuleList),
+        ),
+      );
+    } else {
+      throw Exception('Unknown Route: ${setting.name}');
+    }
   }
 }
