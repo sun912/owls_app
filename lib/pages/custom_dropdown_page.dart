@@ -46,42 +46,40 @@ class _CustomDropdownPageState extends State<CustomDropdownPage> {
         },
         child: CompositedTransformTarget(
           link: _layerLink,
-          child: Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 10,
-                horizontal: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 10,
+              horizontal: 0,
+            ),
+            margin: const EdgeInsets.symmetric(
+              horizontal: 15,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(
+                color: primaryAncient,
+                width: 3.0,
               ),
-              margin: const EdgeInsets.symmetric(
-                horizontal: 15,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                border: Border.all(
-                  color: primaryAncient,
-                  width: 3.0,
-                ),
-                color: backgroundColor,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    _dropdownValue,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      height: 22 / 16,
-                      color: Colors.black,
-                    ),
+              color: backgroundColor,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  _dropdownValue,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    height: 22 / 16,
+                    color: Colors.black,
                   ),
-                  const Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 20,
-                  )
-                ],
-              ),
+                ),
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 20,
+                )
+              ],
             ),
           ),
         ),
