@@ -9,4 +9,20 @@ class OwlsThemeData {
     primaryColorLight: primaryLight,
     primaryColorDark: primary,
   );
+
+  static ExpansionTileThemeData tileThemeData = ExpansionTileThemeData(
+    collapsedShape: Border(
+      top: BorderSide(
+        color: Colors.transparent,
+      ),
+    ),
+    shape: Border(
+      top: BorderSide(
+        color: Colors.transparent,
+      ),
+      bottom: BorderSide(
+        color: Colors.transparent,
+      ),
+    ),
+  );
 }

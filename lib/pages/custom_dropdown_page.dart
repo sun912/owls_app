@@ -4,18 +4,27 @@ import 'package:owls_app/constants.dart';
 
 class CustomDropdownPage extends StatefulWidget {
   final List<String> dropdownList;
-  CustomDropdownPage({Key? key, required this.dropdownList}) : super(key: key);
+  final String initValue;
+  const CustomDropdownPage(
+      {Key? key, required this.dropdownList, required this.initValue})
+      : super(key: key);
 
   @override
   State<CustomDropdownPage> createState() => _CustomDropdownPageState();
 }
 
 class _CustomDropdownPageState extends State<CustomDropdownPage> {
-  String _dropdownValue = 'Select rule target';
+  late String _dropdownValue;
+
+  @override
+  void initState() {
+    _dropdownValue = widget.initValue;
+  }
 
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
   static const double _dropdownWidth = 300;
+
   // static const double _dropdownHeight = 50;
 
   void _createOverlay() {
@@ -38,6 +47,7 @@ class _CustomDropdownPageState extends State<CustomDropdownPage> {
 
   @override
   Widget build(BuildContext context) {
+    // _dropdownValue = widget.initValue;
     return GestureDetector(
       onTap: () => _removeOverlay(),
       child: InkWell(

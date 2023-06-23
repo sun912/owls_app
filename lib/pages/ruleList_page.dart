@@ -33,7 +33,7 @@ class RuleListPage extends StatelessWidget {
         SizedBox(
           height: 10,
         ),
-        RuleItem()
+        Expanded(child: RuleItemWidget()),
       ],
     );
   }

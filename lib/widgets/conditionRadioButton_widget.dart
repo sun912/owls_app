@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
 import 'package:owls_app/data/conditionOptions_data.dart';
-import 'package:owls_app/widgets/positionDetail_widget.dart';
-import 'package:owls_app/widgets/speedDetail_widget.dart';
+import 'package:owls_app/widgets/conditionDetail_widget.dart';
 
 class ConditionRadioButtonWidget extends StatefulWidget {
   Options? selectedOption;
@@ -55,9 +54,11 @@ class _ConditionRadioButtonWidgetState
           ],
         ),
         if (widget.selectedOption?.value == 'position')
-          PositionDetailWidget()
+          ConditionDetailWidget(
+              labelText: '기준 반경을 입력하세요.(단위: m)', limitOptions: ['In', 'Out'])
         else if (widget.selectedOption?.value == 'speed')
-          SpeedDetailWidget(),
+          ConditionDetailWidget(
+              labelText: '기준 속도를 입력하세요.(단위: m)', limitOptions: ['Up', 'Down']),
       ],
     );
   }
