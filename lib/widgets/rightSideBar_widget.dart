@@ -19,12 +19,13 @@ class _RightSideBarWidgetState extends State<RightSideBarWidget> {
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
-    final _showDesktop = _size.width >= 1000;
+    final _showDesktop = _size.width >= 1300;
 
     return Column(
       children: [
         SizedBox(
           width: _showDesktop ? 400 : 0,
+          height: _size.height,
           child: Column(
             children: [
               Row(

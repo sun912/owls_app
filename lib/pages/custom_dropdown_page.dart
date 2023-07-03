@@ -49,47 +49,51 @@ class _CustomDropdownPageState extends State<CustomDropdownPage> {
   Widget build(BuildContext context) {
     // _dropdownValue = widget.initValue;
     return GestureDetector(
-      onTap: () => _removeOverlay(),
+      onTap: () {
+        _overlayEntry?.remove();
+      },
       child: InkWell(
         onTap: () {
-          _createOverlay();
+          _overlayEntry == null ? _createOverlay() : _removeOverlay();
         },
         child: CompositedTransformTarget(
           link: _layerLink,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 10,
-              horizontal: 0,
-            ),
-            margin: const EdgeInsets.symmetric(
-              horizontal: 15,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              border: Border.all(
-                color: primaryAncient,
-                width: 3.0,
+          child: ClipRRect(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 0,
               ),
-              color: backgroundColor,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  _dropdownValue,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    height: 22 / 16,
-                    color: Colors.black,
-                  ),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 15,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                border: Border.all(
+                  color: primaryAncient,
+                  width: 3.0,
                 ),
-                const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 20,
-                )
-              ],
+                color: backgroundColor,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    _dropdownValue,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      height: 22 / 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -109,55 +113,55 @@ class _CustomDropdownPageState extends State<CustomDropdownPage> {
           offset: const Offset(0, 0),
           child: Material(
             color: backgroundColor,
-            child: Container(
-              alignment: Alignment.center,
-              height: (22.0 * widget.dropdownList.length) +
-                  (21 * (widget.dropdownList.length - 1)) +
-                  20,
-              decoration: BoxDecoration(
-                border: Border.all(color: primaryAncient, width: 3),
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: SingleChildScrollView(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  itemCount: widget.dropdownList.length,
-                  itemBuilder: (context, index) {
-                    return CupertinoButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      pressedOpacity: 0.5,
-                      minSize: 0,
-                      onPressed: () {
-                        setState(() {
-                          _dropdownValue = widget.dropdownList.elementAt(index);
-                        });
-                        _removeOverlay();
-                      },
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          widget.dropdownList.elementAt(index),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            height: 22 / 16,
-                            color: Colors.black,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: Container(
+                alignment: Alignment.center,
+                height: (22.0 * widget.dropdownList.length) +
+                    (21 * (widget.dropdownList.length - 1)) +
+                    20,
+                child: SingleChildScrollView(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    itemCount: widget.dropdownList.length,
+                    itemBuilder: (context, index) {
+                      return CupertinoButton(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        pressedOpacity: 0.5,
+                        minSize: 0,
+                        onPressed: () {
+                          setState(() {
+                            _dropdownValue =
+                                widget.dropdownList.elementAt(index);
+                          });
+                          _removeOverlay();
+                        },
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            widget.dropdownList.elementAt(index),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              height: 22 / 16,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                  separatorBuilder: (context, index) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Divider(
-                        color: primaryAncient,
-                        height: 20,
-                      ),
-                    );
-                  },
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Divider(
+                          color: primaryAncient,
+                          height: 20,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

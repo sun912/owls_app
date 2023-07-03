@@ -8,3 +8,9 @@ const primaryLight60 = Color(0xFFB8D2C7);
 const backgroundColor = Color(0xFFFAFAFA);
 const menuBar = Color(0xFFE8F5EF);
 const itemPadding = EdgeInsets.symmetric(horizontal: 20);
+
+const routeRuleList = "/";
+const routeAddRule = "/main/rule/new";
+const rightBarMinWidth = 400;
+
+const String baseUrl = "api.actls.co";

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:owls_app/pages/analytics_page.dart';
 import 'package:owls_app/pages/home_page.dart';
 import 'package:owls_app/pages/questions_page.dart';
 import 'package:owls_app/pages/settings_page.dart';
 import 'package:owls_app/pages/user_page.dart';
 
+var logger = Logger(printer: PrettyPrinter());
 void main() {
   runApp(const MyApp());
 }

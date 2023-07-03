@@ -12,7 +12,7 @@ class _RuleActionWidgetState extends State<RuleActionWidget> {
   @override
   Widget build(BuildContext context) {
     return CustomDropdownPage(
-      dropdownList: const [
+      dropdownList: [
         "Web Push alarm",
         "SMS Alarm",
       ],

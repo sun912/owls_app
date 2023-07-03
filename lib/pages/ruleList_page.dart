@@ -3,9 +3,9 @@ import 'package:owls_app/constants.dart';
 import 'package:owls_app/widgets/ruleItem_widget.dart';
 
 class RuleListPage extends StatelessWidget {
-  const RuleListPage({Key? key, required this.onPress}) : super(key: key);
+  const RuleListPage({Key? key, required this.navigatorKey}) : super(key: key);
 
-  final onPress;
+  final navigatorKey;
 
   get onButtonClick => null;
 
@@ -17,7 +17,9 @@ class RuleListPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             ElevatedButton.icon(
-              onPressed: onPress,
+              onPressed: () {
+                navigatorKey.currentState?.pushNamed(routeAddRule);
+              },
               icon: Icon(Icons.add_circle_outline_outlined),
               label: const Text(
                 'Add Rule',
@@ -30,7 +32,7 @@ class RuleListPage extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Expanded(child: RuleItemWidget()),

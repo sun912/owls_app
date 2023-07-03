@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
+import 'package:owls_app/widgets/map_widget.dart';
 import 'package:owls_app/widgets/rightSideBar_widget.dart';
 
 class ScaffoldBodyWidget extends StatelessWidget {
@@ -44,14 +45,18 @@ class ScaffoldBodyWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Center(
-                    child: Text(
-                      'Map',
-                      style: TextStyle(
-                        fontSize: 48,
-                      ),
-                    ),
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: MapWidget(),
                   ),
+                  // Center(
+                  //   child: Text(
+                  //     'Map',
+                  //     style: TextStyle(
+                  //       fontSize: 48,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

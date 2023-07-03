@@ -5,9 +5,9 @@ import 'package:owls_app/widgets/ConditionRadioButton_widget.dart';
 import 'package:owls_app/widgets/ruleAction_widget.dart';
 
 class NewRulePage extends StatefulWidget {
-  NewRulePage({Key? key, required this.onPress}) : super(key: key);
+  NewRulePage({Key? key, required this.navigatorKey}) : super(key: key);
 
-  final onPress;
+  final navigatorKey;
 
   @override
   State<NewRulePage> createState() => _NewRulePageState();
@@ -52,7 +52,10 @@ class _NewRulePageState extends State<NewRulePage> {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: widget.onPress,
+                            onTap: () {
+                              widget.navigatorKey.currentState
+                                  ?.pushNamed(routeRuleList);
+                            },
                             child: Container(
                               child: const Icon(
                                 Icons.close_rounded,
@@ -119,8 +122,9 @@ class _NewRulePageState extends State<NewRulePage> {
               ElevatedButton.icon(
                 onPressed: () {
                   /*
-                  TODO : request create rule
+                  TODO: request server to save new rule
                    */
+                  widget.navigatorKey.currentState?.pushNamed(routeRuleList);
                 },
                 icon: Icon(Icons.create_rounded),
                 label: const Text(

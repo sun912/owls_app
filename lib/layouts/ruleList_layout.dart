@@ -19,8 +19,6 @@ class _RuleListLayoutState extends State<RuleListLayout> {
   void onButtonClick() {}
 
   final _navigatorKey = GlobalKey<NavigatorState>();
-  final routeRuleList = "/";
-  final routeAddRule = "/main/rule/new";
 
   @override
   Widget build(BuildContext context) {
@@ -43,14 +41,13 @@ class _RuleListLayoutState extends State<RuleListLayout> {
     if (setting.name == routeRuleList) {
       return MaterialPageRoute<dynamic>(
           builder: (context) => RuleListPage(
-                onPress: () =>
-                    _navigatorKey.currentState?.pushNamed(routeAddRule),
+                navigatorKey: _navigatorKey,
               ),
           settings: setting);
     } else if (setting.name == routeAddRule) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => NewRulePage(
-          onPress: () => _navigatorKey.currentState?.pushNamed(routeRuleList),
+          navigatorKey: _navigatorKey,
         ),
       );
     } else {

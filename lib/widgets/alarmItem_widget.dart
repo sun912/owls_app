@@ -142,7 +142,7 @@ class _AlarmItemWidgetState extends State<AlarmItemWidget> {
           const SizedBox(
             height: 10,
           ),
-          Container(
+          SizedBox(
             height: _size.height - 150,
             child: ListView.separated(
               itemBuilder: (BuildContext context, int index) {
@@ -183,9 +183,9 @@ class ItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.all(15),
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         width: widget._showDesktop ? 350 : 0,
-        height: 100,
+        height: 110,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: itemData.isChecked ? primaryLight : Colors.amber,
@@ -198,7 +198,7 @@ class ItemTile extends StatelessWidget {
                   fontSize: 18, height: 3, fontWeight: FontWeight.w600),
               textAlign: TextAlign.start,
               textHeightBehavior: TextHeightBehavior(
-                applyHeightToFirstAscent: false,
+                applyHeightToFirstAscent: true,
                 applyHeightToLastDescent: true,
               ),
             ),
