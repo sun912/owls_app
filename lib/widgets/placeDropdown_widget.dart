@@ -32,8 +32,10 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
   Future<List<dynamic>> requestNextOption(
       String baseUrl, String childPath, Map<String, dynamic> param) async {
     late List<dynamic> nextOptionList;
+
     Uri uri = Uri.https(baseUrl, childPath, param);
     var response = await http.get(uri);
+
     if (response.statusCode == 200) {
       List<dynamic> parsedJson = jsonDecode(utf8.decode(response.bodyBytes));
       logger.d(parsedJson);

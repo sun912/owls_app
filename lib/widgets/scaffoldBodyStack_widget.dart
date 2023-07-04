@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:owls_app/constants.dart';
 import 'package:owls_app/data/site_data.dart';
+import 'package:owls_app/widgets/basicDropdown_widget.dart';
 import 'package:owls_app/widgets/map_widget.dart';
-import 'package:owls_app/widgets/placeFilter_widget.dart';
+import 'package:owls_app/widgets/placeDropdown_widget.dart';
 import 'package:owls_app/widgets/rightSideBar_widget.dart';
 
 class ScaffoldBodyStackWidget extends StatefulWidget {
@@ -33,11 +34,17 @@ class ScaffoldBodyStackWidget extends StatefulWidget {
 
 class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   late Future<List<SiteData>>? futureSite;
-
+  late Future<List<dynamic>> futurePlaceOption;
   @override
   void initState() {
     super.initState();
     futureSite = widget.requestSites();
+  }
+
+  void _setPlaceOption(Future<List<dynamic>> value) {
+    setState(() {
+      futurePlaceOption = value;
+    });
   }
 
   @override
@@ -73,7 +80,54 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                     builder: (BuildContext context,
                         AsyncSnapshot<dynamic> snapshot) {
                       if (snapshot.hasData) {
-                        return PlaceFilterWidget(siteList: snapshot.data);
+                        return Row(
+                          children: [
+                            PlaceDropdownWidget(
+                              dropdownList: snapshot.data,
+                              initValue: "지역 선택",
+                              setPlaceOption: _setPlaceOption,
+                              childPath: "/space",
+                            ),
+                            BasicDropdownWidget(initValue: "건물 선택"),
+
+                            // BasicDropdownWidget(initValue: "층수 선택"),
+                            // FutureBuilder(
+                            //   future: futurePlaceOption,
+                            //   builder: (BuildContext context,
+                            //       AsyncSnapshot<List<dynamic>> snapshot) {
+                            //     if (snapshot.hasData) {
+                            //       return PlaceDropdownWidget(
+                            //         dropdownList: snapshot.data!,
+                            //         initValue: "건물 선택",
+                            //         setPlaceOption: _setPlaceOption,
+                            //         childPath: "/floor",
+                            //       );
+                            //     } else if (snapshot.hasError) {
+                            //       throw Exception(snapshot.error);
+                            //     }
+                            //     return BasicDropdownWidget(initValue: "건물 선택");
+                            //   },
+                            // ),
+                            // FutureBuilder(
+                            //   future: futurePlaceOption,
+                            //   builder: (BuildContext context,
+                            //       AsyncSnapshot<List<dynamic>> snapshot) {
+                            //     if (snapshot.hasData) {
+                            //       return PlaceDropdownWidget(
+                            //         dropdownList: snapshot.data!,
+                            //         initValue: "상세 공간 선택",
+                            //         setPlaceOption: _setPlaceOption,
+                            //         childPath: '',
+                            //       );
+                            //     } else if (snapshot.hasError) {
+                            //       throw Exception(snapshot.error);
+                            //     }
+                            //     return BasicDropdownWidget(
+                            //         initValue: "상세 공간 선택");
+                            //   },
+                            // ),
+                          ],
+                        );
                       } else if (snapshot.hasError) {
                         throw Exception(snapshot.error);
                       }

@@ -54,6 +54,7 @@ class _PlaceFilterWidgetState extends State<PlaceFilterWidget> {
                 dropdownList: snapshot.data!,
                 initValue: "상세 공간 선택",
                 setPlaceOption: _setPlaceOption,
+                childPath: "/map",
               );
             } else if (snapshot.hasError) {
               throw Exception(snapshot.error);
