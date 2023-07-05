@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/widgets/drawerBody_widget.dart';
 import 'package:owls_app/widgets/scaffoldBodyStack_widget.dart';
+import 'package:provider/provider.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({Key? key}) : super(key: key);
@@ -17,7 +19,9 @@ class _MainLayoutState extends State<MainLayout> {
     return Scaffold(
       drawer: DrawerBodyWidget(),
       // body: ScaffoldBodyWidget(),
-      body: ScaffoldBodyStackWidget(),
+      body: ChangeNotifierProvider(
+          create: (BuildContext context) => RequestPlaceProvider(),
+          child: ScaffoldBodyStackWidget()),
     );
   }
 }

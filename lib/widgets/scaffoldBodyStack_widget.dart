@@ -3,14 +3,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:owls_app/constants.dart';
+import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/data/site_data.dart';
-import 'package:owls_app/widgets/basicDropdown_widget.dart';
 import 'package:owls_app/widgets/map_widget.dart';
 import 'package:owls_app/widgets/placeDropdown_widget.dart';
 import 'package:owls_app/widgets/rightSideBar_widget.dart';
+import 'package:provider/provider.dart';
 
 class ScaffoldBodyStackWidget extends StatefulWidget {
   ScaffoldBodyStackWidget({Key? key}) : super(key: key);
+  late String placeId;
 
   @override
   State<ScaffoldBodyStackWidget> createState() =>
@@ -33,23 +35,29 @@ class ScaffoldBodyStackWidget extends StatefulWidget {
 }
 
 class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
-  late Future<List<SiteData>>? futureSite;
-  late Future<List<dynamic>> futurePlaceOption;
+  late Future<List<dynamic>?> futureSite;
+  late Future<List<dynamic>>? futurePlaceId;
+  late String placeId;
+
   @override
   void initState() {
     super.initState();
-    futureSite = widget.requestSites();
+
+    // futureSite = widget.requestSites();
+    placeId = "";
   }
 
-  void _setPlaceOption(Future<List<dynamic>> value) {
-    setState(() {
-      futurePlaceOption = value;
-    });
+  @override
+  void didChangeDependencies() {
+    var provider = Provider.of<RequestPlaceProvider>(context);
+    futureSite = provider.requestNextOption(baseUrl, "/site", {});
   }
 
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<RequestPlaceProvider>(context);
     var _size = MediaQuery.of(context).size;
+
     return SafeArea(
       child: SingleChildScrollView(
         child: Row(
@@ -75,65 +83,22 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                   start: _size.width / 9,
                   end: 50,
                   top: 35,
-                  child: FutureBuilder(
-                    future: futureSite,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<dynamic> snapshot) {
-                      if (snapshot.hasData) {
-                        return Row(
-                          children: [
-                            PlaceDropdownWidget(
-                              dropdownList: snapshot.data,
-                              initValue: "지역 선택",
-                              setPlaceOption: _setPlaceOption,
-                              childPath: "/space",
-                            ),
-                            BasicDropdownWidget(initValue: "건물 선택"),
-
-                            // BasicDropdownWidget(initValue: "층수 선택"),
-                            // FutureBuilder(
-                            //   future: futurePlaceOption,
-                            //   builder: (BuildContext context,
-                            //       AsyncSnapshot<List<dynamic>> snapshot) {
-                            //     if (snapshot.hasData) {
-                            //       return PlaceDropdownWidget(
-                            //         dropdownList: snapshot.data!,
-                            //         initValue: "건물 선택",
-                            //         setPlaceOption: _setPlaceOption,
-                            //         childPath: "/floor",
-                            //       );
-                            //     } else if (snapshot.hasError) {
-                            //       throw Exception(snapshot.error);
-                            //     }
-                            //     return BasicDropdownWidget(initValue: "건물 선택");
-                            //   },
-                            // ),
-                            // FutureBuilder(
-                            //   future: futurePlaceOption,
-                            //   builder: (BuildContext context,
-                            //       AsyncSnapshot<List<dynamic>> snapshot) {
-                            //     if (snapshot.hasData) {
-                            //       return PlaceDropdownWidget(
-                            //         dropdownList: snapshot.data!,
-                            //         initValue: "상세 공간 선택",
-                            //         setPlaceOption: _setPlaceOption,
-                            //         childPath: '',
-                            //       );
-                            //     } else if (snapshot.hasError) {
-                            //       throw Exception(snapshot.error);
-                            //     }
-                            //     return BasicDropdownWidget(
-                            //         initValue: "상세 공간 선택");
-                            //   },
-                            // ),
-                          ],
-                        );
-                      } else if (snapshot.hasError) {
-                        throw Exception(snapshot.error);
-                      }
-
-                      return CircularProgressIndicator();
-                    },
+                  child: Row(
+                    children: [
+                      PlaceDropdownWidget(
+                        dropdownList: provider.siteOptionList,
+                        initValue: "지역 선택",
+                        childPath: "/space",
+                      ),
+                      PlaceDropdownWidget(
+                          dropdownList: provider.spaceOptionList,
+                          initValue: "공간 선택",
+                          childPath: "/floor"),
+                      PlaceDropdownWidget(
+                          dropdownList: provider.floorOptionList,
+                          initValue: "세부 공간 선택",
+                          childPath: ""),
+                    ],
                   ),
                 ),
                 Positioned(

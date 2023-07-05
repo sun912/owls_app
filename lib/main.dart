@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/pages/analytics_page.dart';
 import 'package:owls_app/pages/home_page.dart';
 import 'package:owls_app/pages/questions_page.dart';
 import 'package:owls_app/pages/settings_page.dart';
 import 'package:owls_app/pages/user_page.dart';
+import 'package:provider/provider.dart';
 
 var logger = Logger(printer: PrettyPrinter());
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => RequestPlaceProvider())
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

@@ -1,25 +1,20 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:owls_app/constants.dart';
-import 'package:owls_app/data/floor_data.dart';
-import 'package:owls_app/data/space_data.dart';
+import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/main.dart';
+import 'package:provider/provider.dart';
 
 class PlaceDropdownWidget extends StatefulWidget {
   final List<dynamic> dropdownList;
   final String initValue;
-  final Function setPlaceOption;
-  final String childPath;
+  final String? childPath;
 
-  const PlaceDropdownWidget({
+  PlaceDropdownWidget({
     Key? key,
     required this.dropdownList,
     required this.initValue,
-    required this.setPlaceOption,
-    required this.childPath,
+    this.childPath,
   }) : super(key: key);
 
   @override
@@ -29,34 +24,13 @@ class PlaceDropdownWidget extends StatefulWidget {
 class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
   late String _dropdownValue;
 
-  Future<List<dynamic>> requestNextOption(
-      String baseUrl, String childPath, Map<String, dynamic> param) async {
-    late List<dynamic> nextOptionList;
-
-    Uri uri = Uri.https(baseUrl, childPath, param);
-    var response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      List<dynamic> parsedJson = jsonDecode(utf8.decode(response.bodyBytes));
-      logger.d(parsedJson);
-      if (childPath == "/space") {
-        nextOptionList =
-            parsedJson.map((json) => SpaceData.fromJson(json)).toList();
-      } else {
-        nextOptionList =
-            parsedJson.map((json) => FloorData.fromJson(json)).toList();
-      }
-
-      return nextOptionList;
-    } else {
-      throw Exception();
-    }
-  }
-
   @override
   void initState() {
     _dropdownValue = widget.initValue;
   }
+
+  @override
+  void didChangeDependencies() {}
 
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
@@ -64,9 +38,9 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
 
   // static const double _dropdownHeight = 50;
 
-  void _createOverlay() {
+  void _createOverlay(RequestPlaceProvider provider) {
     if (_overlayEntry == null) {
-      _overlayEntry = _customDropdown();
+      _overlayEntry = _customDropdown(provider);
       Overlay.of(context)!.insert(_overlayEntry!);
     }
   }
@@ -85,13 +59,16 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
   @override
   Widget build(BuildContext context) {
     // _dropdownValue = widget.initValue;
+    late var provider =
+        Provider.of<RequestPlaceProvider>(context, listen: false);
+    late Map<String, dynamic> param;
     return GestureDetector(
       onTap: () {
         _overlayEntry?.remove();
       },
       child: InkWell(
         onTap: () {
-          _overlayEntry == null ? _createOverlay() : _removeOverlay();
+          _overlayEntry == null ? _createOverlay(provider) : _removeOverlay();
         },
         child: CompositedTransformTarget(
           link: _layerLink,
@@ -139,7 +116,7 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
     );
   }
 
-  OverlayEntry _customDropdown() {
+  OverlayEntry _customDropdown(RequestPlaceProvider provider) {
     return OverlayEntry(
       maintainState: true,
       builder: (context) => Positioned(
@@ -175,20 +152,28 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                           _dropdownValue =
                               widget.dropdownList.elementAt(index).name;
                         });
+
                         if (widget.childPath == "/space") {
-                          var futureNextOption = requestNextOption(
-                              baseUrl, widget.childPath, {
-                            "space_id":
-                                "${widget.dropdownList.elementAt(index).id}"
+                          logger.d(
+                              "childPath: ${widget.childPath}  site_id: ${widget.dropdownList.elementAt(index).id}");
+                          provider
+                              .siteId(widget.dropdownList.elementAt(index).id);
+                          provider.requestNextOption(
+                              baseUrl, widget.childPath ?? "", {
+                            "site_id": widget.dropdownList.elementAt(index).id
                           });
-                          widget.setPlaceOption(futureNextOption);
-                        } else {
-                          var futureNextOption = requestNextOption(
-                              baseUrl, widget.childPath, {
-                            "floor_id":
-                                "${widget.dropdownList.elementAt(index).id}"
+                        } else if (widget.childPath == "/floor") {
+                          logger.d("childPath: ${widget.childPath}\n"
+                              "space_id: ${widget.dropdownList.elementAt(index).id} \n"
+                              "site_id: ${provider.getSelectedSiteId}");
+
+                          provider
+                              .spaceId(widget.dropdownList.elementAt(index).id);
+                          provider.requestNextOption(
+                              baseUrl, widget.childPath ?? "", {
+                            "site_id": provider.getSelectedSiteId,
+                            "space_id": widget.dropdownList.elementAt(index).id,
                           });
-                          widget.setPlaceOption(futureNextOption);
                         }
                         _removeOverlay();
                       },
