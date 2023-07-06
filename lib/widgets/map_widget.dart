@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:owls_app/constants.dart';
 import 'package:owls_app/data/mapImage_data.dart';
+import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/main.dart';
+import 'package:provider/provider.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({Key? key}) : super(key: key);
@@ -27,12 +29,22 @@ class MapWidget extends StatefulWidget {
 }
 
 class _MapWidgetState extends State<MapWidget> {
+  late RequestPlaceProvider provider;
   late Future<MapImageData> futureMapImage;
 
   @override
   void initState() {
     super.initState();
-    futureMapImage = widget.requestMap('/');
+  }
+
+  @override
+  void didChangeDependencies() {
+    provider = Provider.of<RequestPlaceProvider>(context);
+    if (!provider.isSearched) {
+      futureMapImage = widget.requestMap('/');
+    } else {
+      futureMapImage = widget.requestMap(provider.getFloorImageUrl);
+    }
   }
 
   @override

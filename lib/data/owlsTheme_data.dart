@@ -10,7 +10,7 @@ class OwlsThemeData {
     primaryColorDark: primary,
   );
 
-  static ExpansionTileThemeData tileThemeData = ExpansionTileThemeData(
+  static ExpansionTileThemeData tileThemeData = const ExpansionTileThemeData(
     collapsedShape: Border(
       top: BorderSide(
         color: Colors.transparent,
@@ -25,4 +25,6 @@ class OwlsThemeData {
       ),
     ),
   );
+
+  static ThemeData color = ThemeData(hoverColor: Colors.grey.shade200);
 }

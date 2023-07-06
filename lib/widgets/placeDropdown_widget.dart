@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
+import 'package:owls_app/data/owlsTheme_data.dart';
 import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/main.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PlaceDropdownWidget extends StatefulWidget {
   final List<dynamic> dropdownList;
@@ -23,18 +25,16 @@ class PlaceDropdownWidget extends StatefulWidget {
 
 class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
   late String _dropdownValue;
+  late SharedPreferences pref;
+  late RequestPlaceProvider provider;
 
+  bool isHovered = false;
   @override
-  void initState() {
-    _dropdownValue = widget.initValue;
-  }
-
-  @override
-  void didChangeDependencies() {}
+  void initState() {}
 
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
-  static const double _dropdownWidth = 180;
+  static const double _dropdownWidth = 200;
 
   // static const double _dropdownHeight = 50;
 
@@ -57,11 +57,29 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
   }
 
   @override
+  Future<void> didChangeDependencies() async {
+    provider = Provider.of<RequestPlaceProvider>(context, listen: false);
+    _dropdownValue = widget.initValue;
+    pref = await SharedPreferences.getInstance();
+    // pref = await initPlace();
+  }
+
+  // Future initPlace() async {
+  //   pref = await SharedPreferences.getInstance();
+  //   final List<String>? checkedPlace = pref.getStringList(placePref);
+  //   if (checkedPlace!.isNotEmpty) {
+  //     for (int i = 0; i < 3; i++) {
+  //       if (checkedPlace.contains(provider.getSelectedPlaceName[i]) == false) {
+  //         provider.setSelectedPlaceName(i, checkedPlace[i]);
+  //       }
+  //     }
+  //   } else {
+  //     await pref.setStringList("checkedPlace", ["", "", ""]);
+  //   }
+  // }
+
+  @override
   Widget build(BuildContext context) {
-    // _dropdownValue = widget.initValue;
-    late var provider =
-        Provider.of<RequestPlaceProvider>(context, listen: false);
-    late Map<String, dynamic> param;
     return GestureDetector(
       onTap: () {
         _overlayEntry?.remove();
@@ -70,23 +88,23 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
         onTap: () {
           _overlayEntry == null ? _createOverlay(provider) : _removeOverlay();
         },
+        onHover: (value) {
+          setState(() {
+            isHovered = value;
+          });
+        },
+        hoverColor: OwlsThemeData.color.hoverColor,
         child: CompositedTransformTarget(
           link: _layerLink,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 10,
-              horizontal: 10,
-            ),
+            padding: EdgeInsets.all(20),
             margin: const EdgeInsets.symmetric(
               horizontal: 30,
             ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: primaryLight60,
-                width: 2.0,
-              ),
-              color: backgroundColor,
+              borderRadius: BorderRadius.circular(50),
+              color:
+                  isHovered ? OwlsThemeData.color.hoverColor : backgroundColor,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -146,35 +164,68 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                     return CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       pressedOpacity: 0.5,
-                      minSize: 0,
-                      onPressed: () {
+                      minSize: 1,
+                      onPressed: () async {
                         setState(() {
                           _dropdownValue =
                               widget.dropdownList.elementAt(index).name;
                         });
 
+                        final checkedPlace = pref.getStringList("checkedPlace");
+
                         if (widget.childPath == "/space") {
-                          logger.d(
-                              "childPath: ${widget.childPath}  site_id: ${widget.dropdownList.elementAt(index).id}");
-                          provider
-                              .siteId(widget.dropdownList.elementAt(index).id);
-                          provider.requestNextOption(
-                              baseUrl, widget.childPath ?? "", {
-                            "site_id": widget.dropdownList.elementAt(index).id
-                          });
+                          var site = widget.dropdownList.elementAt(index);
+                          // logger.d(
+                          //     "childPath: ${widget.childPath}  site_id: ${site.id}");
+                          provider.siteId(site.id);
+                          provider.requestNextOption(baseUrl,
+                              widget.childPath ?? "", {"site_id": site.id});
+                          provider.selectedSite = site;
+                          provider.setSelectedPlaceName(0, site.name);
+
+                          if (checkedPlace!.isNotEmpty) {
+                            if (checkedPlace.contains(site.name) == false) {
+                              checkedPlace?[0] = site.name;
+                            }
+                          }
                         } else if (widget.childPath == "/floor") {
+                          var space = widget.dropdownList.elementAt(index);
                           logger.d("childPath: ${widget.childPath}\n"
-                              "space_id: ${widget.dropdownList.elementAt(index).id} \n"
+                              "space_id: ${space.id} \n"
                               "site_id: ${provider.getSelectedSiteId}");
 
-                          provider
-                              .spaceId(widget.dropdownList.elementAt(index).id);
+                          provider.spaceId(space.id);
                           provider.requestNextOption(
                               baseUrl, widget.childPath ?? "", {
                             "site_id": provider.getSelectedSiteId,
-                            "space_id": widget.dropdownList.elementAt(index).id,
+                            "space_id": provider.getSelectedSpaceId,
                           });
+                          provider.selectedSpace = space;
+                          provider.setSelectedPlaceName(1, space.name);
+
+                          if (checkedPlace!.isNotEmpty) {
+                            if (checkedPlace.contains(space.name) == false) {
+                              checkedPlace?[1] = space.name;
+                            }
+                          }
+                        } else {
+                          var floor = widget.dropdownList.elementAt(index);
+                          if (provider.getFloorImageUrl !=
+                                  floor.floorImageUrl &&
+                              floor.floorImageUrl != null) {
+                            provider.floorImageUrl = floor.floorImageUrl;
+
+                            provider.selectedFloor = floor;
+                            provider.setSelectedPlaceName(2, floor.name);
+                          }
+
+                          if (checkedPlace!.isNotEmpty) {
+                            if (checkedPlace.contains(floor.name) == false) {
+                              checkedPlace?[2] = floor.name;
+                            }
+                          }
                         }
+
                         _removeOverlay();
                       },
                       child: Align(

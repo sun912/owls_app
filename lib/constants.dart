@@ -14,3 +14,4 @@ const routeAddRule = "/main/rule/new";
 const rightBarMinWidth = 400;
 
 const String baseUrl = "api.actls.co";
+const String placePref = "checkedPlace";

@@ -17,7 +17,6 @@ class AlarmItemWidget extends StatefulWidget {
 
 class _AlarmItemWidgetState extends State<AlarmItemWidget> {
   late SharedPreferences prefs;
-  late Timer _timer;
   bool _isStart = false;
 
   final List<AlarmItemData> itemList = [
@@ -159,15 +158,6 @@ class _AlarmItemWidgetState extends State<AlarmItemWidget> {
         ],
       ),
     );
-  }
-
-  void _startTimer() {
-    if (_isStart == false) {
-      _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-        setState(() {});
-      });
-      _isStart = true;
-    }
   }
 }
 

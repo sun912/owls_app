@@ -5,22 +5,68 @@ import 'package:http/http.dart' as http;
 import 'package:owls_app/data/floor_data.dart';
 import 'package:owls_app/data/site_data.dart';
 import 'package:owls_app/data/space_data.dart';
-import 'package:owls_app/main.dart';
 
 class RequestPlaceProvider with ChangeNotifier {
   List<SiteData> _siteOptionList = [];
   List<SpaceData> _spaceOptionList = [];
   List<FloorData> _floorOptionList = [];
+  List<String> _selectedPlaceName = List.filled(3, "");
+
+  late SiteData _selectedSite;
+  late SpaceData _selectedSpace;
+  late FloorData _selectedFloor;
+
   String _siteId = "";
   String _spaceId = "";
   String _floorId = "";
+  String _floorImageUrl = "";
+  bool _isSearched = false;
 
-  List<SiteData> get siteOptionList => _siteOptionList;
-  List<SpaceData> get spaceOptionList => _spaceOptionList;
-  List<FloorData> get floorOptionList => _floorOptionList;
+  List<SiteData> get getSiteOptionList => _siteOptionList;
+  List<SpaceData> get getSpaceOptionList => _spaceOptionList;
+  List<FloorData> get getFloorOptionList => _floorOptionList;
+  String get getFloorImageUrl => _floorImageUrl;
+
   String get getSelectedSiteId => _siteId;
   String get getSelectedSpaceId => _spaceId;
   String get getSelectedFloorId => _floorId;
+
+  SiteData get selectedSite => _selectedSite;
+  SpaceData get selectedSpace => _selectedSpace;
+  FloorData get selectedFloor => _selectedFloor;
+
+  bool get isSearched => _isSearched;
+  List<String> get getSelectedPlaceName => _selectedPlaceName;
+
+  set selectedSite(SiteData value) {
+    _selectedSite = value;
+    notifyListeners();
+  }
+
+  set selectedSpace(SpaceData value) {
+    _selectedSpace = value;
+    notifyListeners();
+  }
+
+  set selectedFloor(FloorData value) {
+    _selectedFloor = value;
+    notifyListeners();
+  }
+
+  set floorImageUrl(String value) {
+    _floorImageUrl = value;
+    notifyListeners();
+  }
+
+  void setSelectedPlaceName(int index, String value) {
+    _selectedPlaceName[index] = value;
+    notifyListeners();
+  }
+
+  void setIsSearched(bool value) {
+    _isSearched = value;
+    notifyListeners();
+  }
 
   void siteId(String value) {
     _siteId = value;
@@ -29,11 +75,6 @@ class RequestPlaceProvider with ChangeNotifier {
 
   void spaceId(String value) {
     _spaceId = value;
-    notifyListeners();
-  }
-
-  void floorId(String value) {
-    _floorId = value;
     notifyListeners();
   }
 
@@ -56,8 +97,6 @@ class RequestPlaceProvider with ChangeNotifier {
         notifyListeners();
         return _spaceOptionList;
       } else if (childPath == "/floor") {
-        logger.d(uri);
-
         _floorOptionList =
             parsedJson.map((json) => FloorData.fromJson(json)).toList();
         notifyListeners();
@@ -69,5 +108,10 @@ class RequestPlaceProvider with ChangeNotifier {
     } else if (response.statusCode >= 500) {
       throw Exception("500 Error");
     }
+  }
+
+  void floorId(String value) {
+    _floorId = value;
+    notifyListeners();
   }
 }

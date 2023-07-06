@@ -8,11 +8,14 @@ import 'package:owls_app/data/site_data.dart';
 import 'package:owls_app/widgets/map_widget.dart';
 import 'package:owls_app/widgets/placeDropdown_widget.dart';
 import 'package:owls_app/widgets/rightSideBar_widget.dart';
+import 'package:owls_app/widgets/searchButton_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../main.dart';
 
 class ScaffoldBodyStackWidget extends StatefulWidget {
   ScaffoldBodyStackWidget({Key? key}) : super(key: key);
-  late String placeId;
 
   @override
   State<ScaffoldBodyStackWidget> createState() =>
@@ -37,20 +40,20 @@ class ScaffoldBodyStackWidget extends StatefulWidget {
 class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   late Future<List<dynamic>?> futureSite;
   late Future<List<dynamic>>? futurePlaceId;
-  late String placeId;
+  late SharedPreferences pref;
+  late RequestPlaceProvider provider;
+  bool isInit = true;
 
   @override
   void initState() {
     super.initState();
-
-    // futureSite = widget.requestSites();
-    placeId = "";
   }
 
   @override
   void didChangeDependencies() {
-    var provider = Provider.of<RequestPlaceProvider>(context);
+    provider = Provider.of<RequestPlaceProvider>(context);
     futureSite = provider.requestNextOption(baseUrl, "/site", {});
+    initPlace();
   }
 
   @override
@@ -80,25 +83,42 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                 ),
                 Positioned.directional(
                   textDirection: TextDirection.ltr,
-                  start: _size.width / 9,
-                  end: 50,
-                  top: 35,
-                  child: Row(
-                    children: [
-                      PlaceDropdownWidget(
-                        dropdownList: provider.siteOptionList,
-                        initValue: "지역 선택",
-                        childPath: "/space",
+                  start: _size.width / 8,
+                  end: 120,
+                  top: 30,
+                  child: Container(
+                    padding: EdgeInsets.zero,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(
+                        color: primaryLight60,
+                        width: 3,
                       ),
-                      PlaceDropdownWidget(
-                          dropdownList: provider.spaceOptionList,
-                          initValue: "공간 선택",
-                          childPath: "/floor"),
-                      PlaceDropdownWidget(
-                          dropdownList: provider.floorOptionList,
-                          initValue: "세부 공간 선택",
-                          childPath: ""),
-                    ],
+                    ),
+                    child: Row(
+                      children: [
+                        PlaceDropdownWidget(
+                          dropdownList: provider.getSiteOptionList,
+                          initValue: isInit
+                              ? "지역 선택"
+                              : provider.getSelectedPlaceName[0],
+                          childPath: "/space",
+                        ),
+                        PlaceDropdownWidget(
+                            dropdownList: provider.getSpaceOptionList,
+                            initValue: isInit
+                                ? "공간 선택"
+                                : provider.getSelectedPlaceName[1],
+                            childPath: "/floor"),
+                        PlaceDropdownWidget(
+                            dropdownList: provider.getFloorOptionList,
+                            initValue: isInit
+                                ? "세부 공간 선택"
+                                : provider.getSelectedPlaceName[2],
+                            childPath: ""),
+                        SearchButtonWidget(),
+                      ],
+                    ),
                   ),
                 ),
                 Positioned(
@@ -137,5 +157,21 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
         ),
       ),
     );
+  }
+
+  Future initPlace() async {
+    pref = await SharedPreferences.getInstance();
+    final List<String>? checkedPlace = pref.getStringList(placePref);
+    if (checkedPlace!.isNotEmpty) {
+      isInit = false;
+      for (int i = 0; i < 3; i++) {
+        if (checkedPlace.contains(provider.getSelectedPlaceName[i]) == false) {
+          logger.d(checkedPlace[i]);
+          provider.setSelectedPlaceName(i, checkedPlace[i]);
+        }
+      }
+    } else {
+      await pref.setStringList("checkedPlace", ["", "", ""]);
+    }
   }
 }
