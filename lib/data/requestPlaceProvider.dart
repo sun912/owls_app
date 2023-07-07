@@ -15,12 +15,11 @@ class RequestPlaceProvider with ChangeNotifier {
   late SiteData _selectedSite;
   late SpaceData _selectedSpace;
   late FloorData _selectedFloor;
-
+  bool _isSearched = false;
   String _siteId = "";
   String _spaceId = "";
   String _floorId = "";
   String _floorImageUrl = "";
-  bool _isSearched = false;
 
   List<SiteData> get getSiteOptionList => _siteOptionList;
   List<SpaceData> get getSpaceOptionList => _spaceOptionList;
@@ -68,6 +67,18 @@ class RequestPlaceProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  set siteOptionList(List<SiteData> value) {
+    _siteOptionList = value;
+  }
+
+  set spaceOptionList(List<SpaceData> value) {
+    _spaceOptionList = value;
+  }
+
+  set floorOptionList(List<FloorData> value) {
+    _floorOptionList = value;
+  }
+
   void siteId(String value) {
     _siteId = value;
     notifyListeners();
@@ -75,6 +86,11 @@ class RequestPlaceProvider with ChangeNotifier {
 
   void spaceId(String value) {
     _spaceId = value;
+    notifyListeners();
+  }
+
+  void floorId(String value) {
+    _floorId = value;
     notifyListeners();
   }
 
@@ -108,10 +124,5 @@ class RequestPlaceProvider with ChangeNotifier {
     } else if (response.statusCode >= 500) {
       throw Exception("500 Error");
     }
-  }
-
-  void floorId(String value) {
-    _floorId = value;
-    notifyListeners();
   }
 }

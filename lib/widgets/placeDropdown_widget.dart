@@ -64,20 +64,6 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
     // pref = await initPlace();
   }
 
-  // Future initPlace() async {
-  //   pref = await SharedPreferences.getInstance();
-  //   final List<String>? checkedPlace = pref.getStringList(placePref);
-  //   if (checkedPlace!.isNotEmpty) {
-  //     for (int i = 0; i < 3; i++) {
-  //       if (checkedPlace.contains(provider.getSelectedPlaceName[i]) == false) {
-  //         provider.setSelectedPlaceName(i, checkedPlace[i]);
-  //       }
-  //     }
-  //   } else {
-  //     await pref.setStringList("checkedPlace", ["", "", ""]);
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -151,9 +137,11 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
             color: backgroundColor,
             child: Container(
               alignment: Alignment.center,
-              height: (22.0 * widget.dropdownList.length) +
-                  (21 * (widget.dropdownList.length - 1)) +
-                  20,
+              height: widget.dropdownList.length > 0
+                  ? (22.0 * widget.dropdownList.length) +
+                      (21 * (widget.dropdownList.length - 1)) +
+                      20
+                  : 1,
               child: SingleChildScrollView(
                 child: ListView.separated(
                   shrinkWrap: true,
@@ -165,25 +153,26 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       pressedOpacity: 0.5,
                       minSize: 1,
-                      onPressed: () async {
+                      onPressed: () {
                         setState(() {
                           _dropdownValue =
                               widget.dropdownList.elementAt(index).name;
                         });
 
-                        final checkedPlace = pref.getStringList("checkedPlace");
+                        final checkedPlace = pref.getStringList(placePref);
 
                         if (widget.childPath == "/space") {
                           var site = widget.dropdownList.elementAt(index);
-                          // logger.d(
-                          //     "childPath: ${widget.childPath}  site_id: ${site.id}");
+                          logger.d(
+                              "childPath: ${widget.childPath}  site_id: ${site.id}");
                           provider.siteId(site.id);
                           provider.requestNextOption(baseUrl,
                               widget.childPath ?? "", {"site_id": site.id});
                           provider.selectedSite = site;
                           provider.setSelectedPlaceName(0, site.name);
 
-                          if (checkedPlace!.isNotEmpty) {
+                          if (checkedPlace!.isNotEmpty &&
+                              site.name.isDefinedAndNotNull) {
                             if (checkedPlace.contains(site.name) == false) {
                               checkedPlace?[0] = site.name;
                             }

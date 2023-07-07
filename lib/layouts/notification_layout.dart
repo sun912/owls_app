@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:owls_app/widgets/alarmItem_widget.dart';
+import 'package:owls_app/widgets/warningItem_widget.dart';
 
 class NotificationLayout extends StatelessWidget {
   final Size _size;
@@ -19,7 +19,7 @@ class NotificationLayout extends StatelessWidget {
       height: _size.height - 50,
       width: _showDesktop ? 400 : 0,
       child: Column(
-        children: [AlarmItemWidget(key: key, showDesktop: _showDesktop)],
+        children: [WarningItemWidget(key: key, showDesktop: _showDesktop)],
       ),
     );
   }

@@ -17,25 +17,24 @@ class _SearchButtonWidgetState extends State<SearchButtonWidget> {
   late RequestPlaceProvider provider;
 
   Future<void> onSearch() async {
-    provider.setIsSearched(true);
-
     var pref = await SharedPreferences.getInstance();
     var placeList = pref.getStringList(placePref);
+    // logger.d(provider.getSelectedPlaceName);
+
+    await pref.setBool(isFirstInitPref, true);
+    // logger.d(pref.getBool(isFirstInitPref));
 
     for (int i = 0; i < 3; i++) {
+      logger.d(provider.getSelectedPlaceName[i]);
       if (placeList!.contains(provider.getSelectedPlaceName[i]) == false) {
-        logger.d(provider.getSelectedPlaceName);
-
         placeList[i] = provider.getSelectedPlaceName[i];
       }
     }
-    logger.d(placeList!);
-    pref.setStringList(placePref, placeList!);
+    await pref.setStringList(placePref, placeList!);
   }
 
   @override
   Widget build(BuildContext context) {
-    var provider = Provider.of<RequestPlaceProvider>(context, listen: false);
     return ElevatedButton.icon(
         onPressed: onSearch,
         icon: Icon(Icons.search_rounded),

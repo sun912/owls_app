@@ -15,3 +15,4 @@ const rightBarMinWidth = 400;
 
 const String baseUrl = "api.actls.co";
 const String placePref = "checkedPlace";
+const String isFirstInitPref = "isInit";

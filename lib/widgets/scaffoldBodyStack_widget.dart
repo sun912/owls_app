@@ -27,7 +27,7 @@ class ScaffoldBodyStackWidget extends StatefulWidget {
 
     if (response.statusCode == 200) {
       List<dynamic> parsedJson = jsonDecode(utf8.decode(response.bodyBytes));
-      // logger.d(parsedJson);
+
       List<SiteData> siteList =
           parsedJson.map<SiteData>((json) => SiteData.fromJson(json)).toList();
       return siteList;
@@ -42,25 +42,49 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   late Future<List<dynamic>>? futurePlaceId;
   late SharedPreferences pref;
   late RequestPlaceProvider provider;
-  bool isInit = true;
+  late bool isChecked;
+
+  List<String> cachedPlaces = [];
+
+  Future initPlace() async {
+    pref = await SharedPreferences.getInstance();
+    final List<String>? checkedPlace = pref.getStringList(placePref);
+    logger.d("pref.getBool(isFirstInitPref): ${pref.getBool(isFirstInitPref)}");
+    // isChecked = pref.getBool(isFirstInitPref) ?? false;
+    isChecked = pref.getBool(isFirstInitPref) ?? false;
+    if (checkedPlace != null && checkedPlace!.isNotEmpty) {
+      if (!cachedPlaces.contains(checkedPlace)) {
+        cachedPlaces = checkedPlace;
+      }
+
+      // await pref.setStringList(placePref, checkedPlace!);
+      // cachedPlaces = checkedPlace;
+
+      logger.d("ischecked: $isChecked");
+    } else {
+      await pref.setStringList(placePref, ["", "", ""]);
+      cachedPlaces = pref.getStringList(placePref)!;
+    }
+    logger.d("cachedPlaces: $cachedPlaces");
+  }
 
   @override
   void initState() {
     super.initState();
+    initPlace();
+    // isChecked = pref.getBool(isFirstInitPref) ?? false;
+    // logger.d(cachedPlaces);
   }
 
   @override
   void didChangeDependencies() {
     provider = Provider.of<RequestPlaceProvider>(context);
     futureSite = provider.requestNextOption(baseUrl, "/site", {});
-    initPlace();
   }
 
   @override
   Widget build(BuildContext context) {
-    var provider = Provider.of<RequestPlaceProvider>(context);
     var _size = MediaQuery.of(context).size;
-
     return SafeArea(
       child: SingleChildScrollView(
         child: Row(
@@ -99,24 +123,19 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                       children: [
                         PlaceDropdownWidget(
                           dropdownList: provider.getSiteOptionList,
-                          initValue: isInit
-                              ? "지역 선택"
-                              : provider.getSelectedPlaceName[0],
+                          initValue: isChecked! ? cachedPlaces[0] : "지역 선택",
                           childPath: "/space",
                         ),
                         PlaceDropdownWidget(
                             dropdownList: provider.getSpaceOptionList,
-                            initValue: isInit
-                                ? "공간 선택"
-                                : provider.getSelectedPlaceName[1],
+                            initValue: isChecked! ? cachedPlaces[1] : "공간 선택",
                             childPath: "/floor"),
                         PlaceDropdownWidget(
                             dropdownList: provider.getFloorOptionList,
-                            initValue: isInit
-                                ? "세부 공간 선택"
-                                : provider.getSelectedPlaceName[2],
+                            initValue:
+                                isChecked! ? cachedPlaces[2] : "세부 공간 선택",
                             childPath: ""),
-                        SearchButtonWidget(),
+                        const SearchButtonWidget(),
                       ],
                     ),
                   ),
@@ -157,21 +176,5 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
         ),
       ),
     );
-  }
-
-  Future initPlace() async {
-    pref = await SharedPreferences.getInstance();
-    final List<String>? checkedPlace = pref.getStringList(placePref);
-    if (checkedPlace!.isNotEmpty) {
-      isInit = false;
-      for (int i = 0; i < 3; i++) {
-        if (checkedPlace.contains(provider.getSelectedPlaceName[i]) == false) {
-          logger.d(checkedPlace[i]);
-          provider.setSelectedPlaceName(i, checkedPlace[i]);
-        }
-      }
-    } else {
-      await pref.setStringList("checkedPlace", ["", "", ""]);
-    }
   }
 }
