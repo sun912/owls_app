@@ -36,6 +36,7 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
   late SharedPreferences prefs;
   bool _isStart = false;
 
+  // TODO: not work state caching....
   Future initPrefs() async {
     prefs = await SharedPreferences.getInstance();
     final checkedAlarms = prefs.getStringList('checkedAlarms');
