@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
 import 'package:owls_app/data/owlsTheme_data.dart';
 import 'package:owls_app/data/requestPlaceProvider.dart';
-import 'package:owls_app/main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -163,25 +162,24 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
 
                         if (widget.childPath == "/space") {
                           var site = widget.dropdownList.elementAt(index);
-                          logger.d(
-                              "childPath: ${widget.childPath}  site_id: ${site.id}");
+                          // logger.d(
+                          //     "childPath: ${widget.childPath}  site_id: ${site.id}");
                           provider.siteId(site.id);
                           provider.requestNextOption(baseUrl,
                               widget.childPath ?? "", {"site_id": site.id});
                           provider.selectedSite = site;
                           provider.setSelectedPlaceName(0, site.name);
 
-                          if (checkedPlace!.isNotEmpty &&
-                              site.name.isDefinedAndNotNull) {
+                          if (checkedPlace!.isNotEmpty && site.name != null) {
                             if (checkedPlace.contains(site.name) == false) {
                               checkedPlace?[0] = site.name;
                             }
                           }
                         } else if (widget.childPath == "/floor") {
                           var space = widget.dropdownList.elementAt(index);
-                          logger.d("childPath: ${widget.childPath}\n"
-                              "space_id: ${space.id} \n"
-                              "site_id: ${provider.getSelectedSiteId}");
+                          // logger.d("childPath: ${widget.childPath}\n"
+                          //     "space_id: ${space.id} \n"
+                          //     "site_id: ${provider.getSelectedSiteId}");
 
                           provider.spaceId(space.id);
                           provider.requestNextOption(

@@ -4,8 +4,11 @@ import 'package:owls_app/widgets/warningItem_widget.dart';
 class NotificationLayout extends StatelessWidget {
   final Size _size;
   final bool _showDesktop;
-  const NotificationLayout({Key? key, required size, required showDesktop})
-      : _size = size,
+  const NotificationLayout({
+    Key? key,
+    required size,
+    required showDesktop,
+  })  : _size = size,
         _showDesktop = showDesktop,
         super(key: key);
 
@@ -19,7 +22,7 @@ class NotificationLayout extends StatelessWidget {
       height: _size.height - 50,
       width: _showDesktop ? 400 : 0,
       child: Column(
-        children: [WarningItemWidget(key: key, showDesktop: _showDesktop)],
+        children: [WarningItemWidget(key: key)],
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:owls_app/constants.dart';
 import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/data/site_data.dart';
+import 'package:owls_app/data/warningItem_data.dart';
 import 'package:owls_app/widgets/map_widget.dart';
 import 'package:owls_app/widgets/placeDropdown_widget.dart';
 import 'package:owls_app/widgets/rightSideBar_widget.dart';
@@ -12,14 +13,26 @@ import 'package:owls_app/widgets/searchButton_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../main.dart';
-
 class ScaffoldBodyStackWidget extends StatefulWidget {
   ScaffoldBodyStackWidget({Key? key}) : super(key: key);
-
+  late Future<List<WarningItemData>> futureWarnings;
   @override
   State<ScaffoldBodyStackWidget> createState() =>
       _ScaffoldBodyStackWidgetState();
+
+  Future<List<WarningItemData>> getWarnings() async {
+    Uri uri = Uri.https(baseUrl, "/warning", {});
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      List<dynamic> alarmItemData = jsonDecode(utf8.decode(response.bodyBytes));
+      List<WarningItemData> alarmList = alarmItemData
+          .map<WarningItemData>((json) => WarningItemData.fromJson(json))
+          .toList();
+      return alarmList;
+    } else {
+      throw Exception("Failed getting alarms");
+    }
+  }
 
   Future<List<SiteData>> requestSites() async {
     Uri uri = Uri.https(baseUrl, '/site');
@@ -40,40 +53,34 @@ class ScaffoldBodyStackWidget extends StatefulWidget {
 class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   late Future<List<dynamic>?> futureSite;
   late Future<List<dynamic>>? futurePlaceId;
-  late SharedPreferences pref;
+  SharedPreferences? pref;
   late RequestPlaceProvider provider;
-  late bool isChecked;
+  bool? isChecked;
 
   List<String> cachedPlaces = [];
 
   Future initPlace() async {
     pref = await SharedPreferences.getInstance();
-    final List<String>? checkedPlace = pref.getStringList(placePref);
-    logger.d("pref.getBool(isFirstInitPref): ${pref.getBool(isFirstInitPref)}");
-    // isChecked = pref.getBool(isFirstInitPref) ?? false;
-    isChecked = pref.getBool(isFirstInitPref) ?? false;
-    if (checkedPlace != null && checkedPlace!.isNotEmpty) {
-      if (!cachedPlaces.contains(checkedPlace)) {
-        cachedPlaces = checkedPlace;
-      }
-
-      // await pref.setStringList(placePref, checkedPlace!);
-      // cachedPlaces = checkedPlace;
-
-      logger.d("ischecked: $isChecked");
+    List<String>? prevPlace = pref?.getStringList(placePref);
+    isChecked = pref?.getBool(isFirstInitPref) ?? false;
+    // logger.d("isChecked: $isChecked");
+    if (isChecked!) {
+      cachedPlaces = [];
+      cachedPlaces.addAll(prevPlace!);
+      // await pref.setStringList(placePref, prevPlace!);
+      // cachedPlaces = prevPlace;
     } else {
-      await pref.setStringList(placePref, ["", "", ""]);
-      cachedPlaces = pref.getStringList(placePref)!;
+      await pref?.setStringList(placePref, ["", "", ""]);
+      cachedPlaces = pref!.getStringList(placePref)!;
     }
-    logger.d("cachedPlaces: $cachedPlaces");
+    // logger.d("cachedPlace: $cachedPlaces");
+    // logger.d("prevPlace: $prevPlace");
   }
 
   @override
   void initState() {
+    widget.futureWarnings = widget.getWarnings();
     super.initState();
-    initPlace();
-    // isChecked = pref.getBool(isFirstInitPref) ?? false;
-    // logger.d(cachedPlaces);
   }
 
   @override
@@ -85,6 +92,10 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   @override
   Widget build(BuildContext context) {
     var _size = MediaQuery.of(context).size;
+    setState(() {
+      // isChecked = pref?.getBool(isFirstInitPref) ?? false;
+      initPlace();
+    });
     return SafeArea(
       child: SingleChildScrollView(
         child: Row(
@@ -135,7 +146,7 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                             initValue:
                                 isChecked! ? cachedPlaces[2] : "세부 공간 선택",
                             childPath: ""),
-                        const SearchButtonWidget(),
+                        SearchButtonWidget(),
                       ],
                     ),
                   ),
@@ -171,7 +182,7 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                 ),
               ],
             ),
-            const RightSideBarWidget(),
+            RightSideBarWidget(),
           ],
         ),
       ),

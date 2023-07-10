@@ -5,12 +5,14 @@ import 'package:http/http.dart' as http;
 import 'package:owls_app/data/floor_data.dart';
 import 'package:owls_app/data/site_data.dart';
 import 'package:owls_app/data/space_data.dart';
+import 'package:owls_app/data/warningItem_data.dart';
 
 class RequestPlaceProvider with ChangeNotifier {
   List<SiteData> _siteOptionList = [];
   List<SpaceData> _spaceOptionList = [];
   List<FloorData> _floorOptionList = [];
   List<String> _selectedPlaceName = List.filled(3, "");
+  List<WarningItemData>? _warningItemList;
 
   late SiteData _selectedSite;
   late SpaceData _selectedSpace;
@@ -24,6 +26,7 @@ class RequestPlaceProvider with ChangeNotifier {
   List<SiteData> get getSiteOptionList => _siteOptionList;
   List<SpaceData> get getSpaceOptionList => _spaceOptionList;
   List<FloorData> get getFloorOptionList => _floorOptionList;
+  List<WarningItemData>? get getWarningItemList => _warningItemList;
   String get getFloorImageUrl => _floorImageUrl;
 
   String get getSelectedSiteId => _siteId;
@@ -36,6 +39,11 @@ class RequestPlaceProvider with ChangeNotifier {
 
   bool get isSearched => _isSearched;
   List<String> get getSelectedPlaceName => _selectedPlaceName;
+
+  set setWarningItemList(List<WarningItemData> warnings) {
+    _warningItemList = warnings;
+    notifyListeners();
+  }
 
   set selectedSite(SiteData value) {
     _selectedSite = value;
@@ -69,14 +77,17 @@ class RequestPlaceProvider with ChangeNotifier {
 
   set siteOptionList(List<SiteData> value) {
     _siteOptionList = value;
+    notifyListeners();
   }
 
   set spaceOptionList(List<SpaceData> value) {
     _spaceOptionList = value;
+    notifyListeners();
   }
 
   set floorOptionList(List<FloorData> value) {
     _floorOptionList = value;
+    notifyListeners();
   }
 
   void siteId(String value) {

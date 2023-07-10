@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
 import 'package:owls_app/widgets/map_widget.dart';
-import 'package:owls_app/widgets/rightSideBar_widget.dart';
 
 class ScaffoldBodyWidget extends StatelessWidget {
   const ScaffoldBodyWidget({Key? key}) : super(key: key);
@@ -61,7 +60,7 @@ class ScaffoldBodyWidget extends StatelessWidget {
               ),
             ),
           ),
-          const RightSideBarWidget(),
+          // const RightSideBarWidget(),
         ],
       ),
     );

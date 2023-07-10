@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 var logger = Logger(printer: PrettyPrinter());
 void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [

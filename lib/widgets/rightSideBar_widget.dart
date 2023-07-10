@@ -4,7 +4,7 @@ import 'package:owls_app/layouts/notification_layout.dart';
 import 'package:owls_app/layouts/ruleList_layout.dart';
 
 class RightSideBarWidget extends StatefulWidget {
-  const RightSideBarWidget({Key? key}) : super(key: key);
+  RightSideBarWidget({Key? key}) : super(key: key);
 
   @override
   State<RightSideBarWidget> createState() => _RightSideBarWidgetState();
