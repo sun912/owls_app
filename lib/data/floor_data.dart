@@ -13,4 +13,15 @@ class FloorData {
       id: json['floor_id'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {"id": id, "name": name, "floor_image_url": floorImageUrl};
+  }
+
+  factory FloorData.fromJsonForPref(Map<String, dynamic> json) {
+    return FloorData(
+        name: json['name'],
+        id: json['id'],
+        floorImageUrl: json['floor_image_url']);
+  }
 }

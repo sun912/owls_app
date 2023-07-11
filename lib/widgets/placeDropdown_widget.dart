@@ -231,6 +231,12 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                               checkedPlace?[2] = floor.name;
                             }
                           }
+                          List<String> floorList = provider.getFloorOptionList
+                              .map((element) => jsonEncode(element.toJson()))
+                              .toList();
+                          if (floorList.isNotEmpty) {
+                            pref?.setStringList("floorList", floorList);
+                          }
                           pref?.setString("selectedFloorId", floor.id);
                         }
 

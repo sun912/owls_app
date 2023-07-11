@@ -58,6 +58,7 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
       cachedPlaces.addAll(prevPlace!);
       List<String>? siteListString = pref?.getStringList('siteList');
       List<String>? spaceListString = pref?.getStringList('spaceList');
+      List<String>? floorListString = pref?.getStringList('floorList');
 
       selectedSiteList = siteListString
           ?.map((item) => SiteData.fromJsonForPref(json.decode(item)))
@@ -65,6 +66,10 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
 
       selectedSpaceList = spaceListString
           ?.map((item) => SpaceData.fromJsonForPref(json.decode(item)))
+          .toList();
+
+      selectedFloorList = floorListString
+          ?.map((item) => FloorData.fromJsonForPref(json.decode(item)))
           .toList();
 
       // logger.d("selected Space List: ${selectedSpaceList}");
@@ -149,7 +154,9 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                             initValue: isChecked! ? cachedPlaces[1] : "공간 선택",
                             childPath: "/floor"),
                         PlaceDropdownWidget(
-                            dropdownList: provider.getFloorOptionList,
+                            dropdownList: isChecked!
+                                ? selectedFloorList!
+                                : provider.getFloorOptionList,
                             initValue:
                                 isChecked! ? cachedPlaces[2] : "세부 공간 선택",
                             childPath: ""),
