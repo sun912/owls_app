@@ -15,4 +15,18 @@ class SiteData {
     }
     throw Exception('SiteData from Json is failed');
   }
+
+  Map<String, dynamic> toJson() {
+    return {"id": id, "name": name};
+  }
+
+  factory SiteData.fromJsonForPref(Map<String, dynamic> json) {
+    if (json.isNotEmpty) {
+      return SiteData(
+        id: json['id'] ?? "",
+        name: json['name'] ?? "",
+      );
+    }
+    throw Exception();
+  }
 }

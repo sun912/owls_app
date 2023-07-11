@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
@@ -5,6 +7,9 @@ import 'package:owls_app/data/owlsTheme_data.dart';
 import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../data/site_data.dart';
+import '../main.dart';
 
 class PlaceDropdownWidget extends StatefulWidget {
   final List<dynamic> dropdownList;
@@ -37,9 +42,9 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
 
   // static const double _dropdownHeight = 50;
 
-  void _createOverlay(RequestPlaceProvider provider) {
+  void _createOverlay() {
     if (_overlayEntry == null) {
-      _overlayEntry = _customDropdown(provider);
+      _overlayEntry = _customDropdown();
       Overlay.of(context)!.insert(_overlayEntry!);
     }
   }
@@ -71,7 +76,7 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
       },
       child: InkWell(
         onTap: () {
-          _overlayEntry == null ? _createOverlay(provider) : _removeOverlay();
+          _overlayEntry == null ? _createOverlay() : _removeOverlay();
         },
         onHover: (value) {
           setState(() {
@@ -119,7 +124,7 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
     );
   }
 
-  OverlayEntry _customDropdown(RequestPlaceProvider provider) {
+  OverlayEntry _customDropdown() {
     return OverlayEntry(
       maintainState: true,
       builder: (context) => Positioned(
@@ -152,7 +157,7 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       pressedOpacity: 0.5,
                       minSize: 1,
-                      onPressed: () {
+                      onPressed: () async {
                         setState(() {
                           _dropdownValue =
                               widget.dropdownList.elementAt(index).name;
@@ -162,32 +167,40 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
 
                         if (widget.childPath == "/space") {
                           var site = widget.dropdownList.elementAt(index);
-                          // logger.d(
-                          //     "childPath: ${widget.childPath}  site_id: ${site.id}");
-                          provider.siteId(site.id);
+                          provider.setSiteNameList = widget.dropdownList
+                              .map<String>((value) => value.name)
+                              .toList();
+
+                          provider.setSelectedSiteId = site.id;
                           provider.requestNextOption(baseUrl,
                               widget.childPath ?? "", {"site_id": site.id});
-                          provider.selectedSite = site;
+                          // provider.selectedSite = site;
                           provider.setSelectedPlaceName(0, site.name);
+                          provider.siteOptionList =
+                              widget.dropdownList as List<SiteData>;
 
                           if (checkedPlace!.isNotEmpty && site.name != null) {
                             if (checkedPlace.contains(site.name) == false) {
                               checkedPlace?[0] = site.name;
                             }
                           }
+                          pref?.setString("selectedSiteId", site.id);
                         } else if (widget.childPath == "/floor") {
                           var space = widget.dropdownList.elementAt(index);
-                          // logger.d("childPath: ${widget.childPath}\n"
-                          //     "space_id: ${space.id} \n"
-                          //     "site_id: ${provider.getSelectedSiteId}");
 
-                          provider.spaceId(space.id);
+                          provider.setSpaceNameList = widget.dropdownList
+                              .map<String>((value) => value.name)
+                              .toList();
+                          provider.setSelectedSpaceId = space.id;
+                          logger.d(
+                              "site_id in space block: ${pref?.getString("selectedSiteId")}");
+
                           provider.requestNextOption(
                               baseUrl, widget.childPath ?? "", {
-                            "site_id": provider.getSelectedSiteId,
+                            "site_id": pref?.getString("selectedSiteId"),
                             "space_id": provider.getSelectedSpaceId,
                           });
-                          provider.selectedSpace = space;
+                          // provider.selectedSpace = space;
                           provider.setSelectedPlaceName(1, space.name);
 
                           if (checkedPlace!.isNotEmpty) {
@@ -195,14 +208,24 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                               checkedPlace?[1] = space.name;
                             }
                           }
+                          List<String> spaceList = provider.getSpaceOptionList
+                              .map((element) => jsonEncode(element.toJson()))
+                              .toList();
+                          if (spaceList.isNotEmpty) {
+                            pref?.setStringList("spaceList", spaceList);
+                          }
+                          pref?.setString("selectedSpaceId", space.id);
                         } else {
                           var floor = widget.dropdownList.elementAt(index);
+                          provider.setFloorNameList = widget.dropdownList
+                              .map<String>((value) => value.name)
+                              .toList();
                           if (provider.getFloorImageUrl !=
                                   floor.floorImageUrl &&
                               floor.floorImageUrl != null) {
                             provider.floorImageUrl = floor.floorImageUrl;
 
-                            provider.selectedFloor = floor;
+                            // provider.selectedFloor = floor;
                             provider.setSelectedPlaceName(2, floor.name);
                           }
 
@@ -211,6 +234,7 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                               checkedPlace?[2] = floor.name;
                             }
                           }
+                          pref?.setString("selectedFloorId", floor.id);
                         }
 
                         _removeOverlay();

@@ -7,10 +7,12 @@ import 'package:owls_app/pages/questions_page.dart';
 import 'package:owls_app/pages/settings_page.dart';
 import 'package:owls_app/pages/user_page.dart';
 import 'package:provider/provider.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 var logger = Logger(printer: PrettyPrinter());
 void main() {
   // WidgetsFlutterBinding.ensureInitialized();
+  setPathUrlStrategy();
   runApp(
     MultiProvider(
       providers: [

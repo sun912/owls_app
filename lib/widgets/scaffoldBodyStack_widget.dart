@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:owls_app/constants.dart';
+import 'package:owls_app/data/floor_data.dart';
 import 'package:owls_app/data/requestPlaceProvider.dart';
 import 'package:owls_app/data/site_data.dart';
+import 'package:owls_app/data/space_data.dart';
 import 'package:owls_app/data/warningItem_data.dart';
 import 'package:owls_app/widgets/map_widget.dart';
 import 'package:owls_app/widgets/placeDropdown_widget.dart';
@@ -33,21 +35,6 @@ class ScaffoldBodyStackWidget extends StatefulWidget {
       throw Exception("Failed getting alarms");
     }
   }
-
-  Future<List<SiteData>> requestSites() async {
-    Uri uri = Uri.https(baseUrl, '/site');
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      List<dynamic> parsedJson = jsonDecode(utf8.decode(response.bodyBytes));
-
-      List<SiteData> siteList =
-          parsedJson.map<SiteData>((json) => SiteData.fromJson(json)).toList();
-      return siteList;
-    } else {
-      throw Exception('failed loading');
-    }
-  }
 }
 
 class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
@@ -56,25 +43,35 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   SharedPreferences? pref;
   late RequestPlaceProvider provider;
   bool? isChecked;
-
+  List<SiteData>? selectedSiteList;
+  List<SpaceData>? selectedSpaceList;
+  List<FloorData>? selectedFloorList;
   List<String> cachedPlaces = [];
 
   Future initPlace() async {
     pref = await SharedPreferences.getInstance();
     List<String>? prevPlace = pref?.getStringList(placePref);
     isChecked = pref?.getBool(isFirstInitPref) ?? false;
-    // logger.d("isChecked: $isChecked");
+
     if (isChecked!) {
       cachedPlaces = [];
       cachedPlaces.addAll(prevPlace!);
-      // await pref.setStringList(placePref, prevPlace!);
-      // cachedPlaces = prevPlace;
+      List<String>? siteListString = pref?.getStringList('siteList');
+      List<String>? spaceListString = pref?.getStringList('spaceList');
+
+      selectedSiteList = siteListString
+          ?.map((item) => SiteData.fromJsonForPref(json.decode(item)))
+          .toList();
+
+      selectedSpaceList = spaceListString
+          ?.map((item) => SpaceData.fromJsonForPref(json.decode(item)))
+          .toList();
+
+      // logger.d("selected Space List: ${selectedSpaceList}");
     } else {
       await pref?.setStringList(placePref, ["", "", ""]);
       cachedPlaces = pref!.getStringList(placePref)!;
     }
-    // logger.d("cachedPlace: $cachedPlaces");
-    // logger.d("prevPlace: $prevPlace");
   }
 
   @override
@@ -87,15 +84,21 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   void didChangeDependencies() {
     provider = Provider.of<RequestPlaceProvider>(context);
     futureSite = provider.requestNextOption(baseUrl, "/site", {});
+
+    List<String> siteList = provider.getSiteOptionList
+        .map((element) => jsonEncode(element.toJson()))
+        .toList();
+    pref?.setStringList("siteList", siteList);
+
+    // logger.d('siteList: ${pref?.getStringList("siteList")}');
   }
 
   @override
   Widget build(BuildContext context) {
     var _size = MediaQuery.of(context).size;
-    setState(() {
-      // isChecked = pref?.getBool(isFirstInitPref) ?? false;
-      initPlace();
-    });
+    initPlace();
+    // logger.d("provider.spaceId: ${provider.getSpaceOptionList.length}");
+
     return SafeArea(
       child: SingleChildScrollView(
         child: Row(
@@ -133,12 +136,16 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                     child: Row(
                       children: [
                         PlaceDropdownWidget(
-                          dropdownList: provider.getSiteOptionList,
+                          dropdownList: isChecked!
+                              ? selectedSiteList!
+                              : provider.getSiteOptionList,
                           initValue: isChecked! ? cachedPlaces[0] : "지역 선택",
                           childPath: "/space",
                         ),
                         PlaceDropdownWidget(
-                            dropdownList: provider.getSpaceOptionList,
+                            dropdownList: isChecked!
+                                ? selectedSpaceList!
+                                : provider.getSpaceOptionList,
                             initValue: isChecked! ? cachedPlaces[1] : "공간 선택",
                             childPath: "/floor"),
                         PlaceDropdownWidget(

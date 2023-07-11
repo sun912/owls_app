@@ -9,6 +9,8 @@ import 'package:owls_app/data/warningItem_data.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
+
 class WarningItemWidget extends StatefulWidget {
   WarningItemWidget({
     Key? key,
@@ -19,6 +21,13 @@ class WarningItemWidget extends StatefulWidget {
 
   @override
   State<WarningItemWidget> createState() => _WarningItemWidgetState();
+}
+
+class _WarningItemWidgetState extends State<WarningItemWidget> {
+  late SharedPreferences prefs;
+  late Future<List<WarningItemData>> futureWarningList;
+  bool isStart = false;
+  RequestPlaceProvider? provider;
 
   Future<List<WarningItemData>> getWarnings() async {
     Uri uri = Uri.https(baseUrl, "/warning", {});
@@ -28,27 +37,17 @@ class WarningItemWidget extends StatefulWidget {
       List<WarningItemData> alarmList = alarmItemData
           .map<WarningItemData>((json) => WarningItemData.fromJson(json))
           .toList();
+
       return alarmList;
     } else {
       throw Exception("Failed getting alarms");
     }
   }
-}
-
-class _WarningItemWidgetState extends State<WarningItemWidget> {
-  late SharedPreferences prefs;
-  late Future<List<WarningItemData>> futureWarningList;
-  bool isStart = false;
 
   Future initPrefs() async {
-    // var futureWarningList = widget.getWarnings();
-    // futureWarningList
-    //     .then((value) => widget.warningList = value)
-    //     .onError((error, stackTrace) => throw Exception(error));
-    // logger.d("length:${widget.warningList!.length}");
-
     prefs = await SharedPreferences.getInstance();
     final checkedAlarms = prefs.getStringList(isCheckedWarning);
+    logger.d("checkedAlarms: ${checkedAlarms?.length}");
     if (checkedAlarms != null && widget.warningList != null) {
       for (int i = 0; i < widget.warningList!.length; i++) {
         if (checkedAlarms.contains(widget.warningList![i].createDateTime) ==
@@ -65,15 +64,21 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
 
   @override
   void initState() {
-    futureWarningList = widget.getWarnings();
+    futureWarningList = getWarnings();
     initPrefs();
+    // futureWarningList.then((value) => widget.warningList = value);
+  }
+
+  @override
+  void didChangeDependencies() {
+    provider = Provider.of<RequestPlaceProvider>(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
     widget._showDesktop = _size.width > 1300;
-    final provider = Provider.of<RequestPlaceProvider>(context);
+    // logger.d("provider.siteId: ${provider?.getSelectedSiteId}");
 
     return Padding(
       padding: const EdgeInsets.only(top: 15),
@@ -119,49 +124,48 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
           ),
           SizedBox(
             height: _size.height - 150,
-            child: provider.isSearched
-                ? ListView.separated(
+            child: FutureBuilder(
+              future: futureWarningList,
+              builder: ((context, snapshot) {
+                if (snapshot.hasData) {
+                  widget.warningList = snapshot.data!;
+                  final checkedAlarms = prefs.getStringList(isCheckedWarning);
+
+                  if (checkedAlarms != null && widget.warningList != null) {
+                    for (int i = 0; i < widget.warningList!.length; i++) {
+                      if (checkedAlarms
+                          .contains(widget.warningList![i].createDateTime)) {
+                        widget.warningList![i].isChecked = true;
+                      }
+                    }
+                  }
+                  widget.warningList!.retainWhere((element) =>
+                      element.siteId == provider?.getSelectedSiteId);
+                  return ListView.separated(
                     itemBuilder: (BuildContext context, int index) {
                       return ItemTile(
                         widget: widget,
-                        itemData: provider.getWarningItemList![index],
+                        itemData: widget.warningList![index],
                       );
                     },
                     separatorBuilder: (BuildContext context, int index) =>
                         const Divider(),
-                    itemCount: provider.getWarningItemList!.length,
-                  )
-                : FutureBuilder(
-                    future: futureWarningList,
-                    builder: ((context, snapshot) {
-                      if (snapshot.hasData) {
-                        widget.warningList = snapshot.data!;
-                        widget.warningList!.retainWhere((element) =>
-                            element.siteId == provider.getSelectedSiteId);
-                        return ListView.separated(
-                          itemBuilder: (BuildContext context, int index) {
-                            return ItemTile(
-                              widget: widget,
-                              itemData: widget.warningList![index],
-                            );
-                          },
-                          separatorBuilder: (BuildContext context, int index) =>
-                              const Divider(),
-                          itemCount: snapshot.data!.length,
-                        );
-                      } else if (snapshot.hasError) {
-                        throw Exception();
-                      } else {
-                        const Center(
-                          child: Text("No warnings"),
-                        );
-                      }
-                      return const CircularProgressIndicator(
-                        semanticsLabel: "Loading...",
-                        color: primaryAncient,
-                      );
-                    }),
-                  ),
+                    itemCount: snapshot.data!.length,
+                  );
+                } else if (snapshot.hasError) {
+                  throw Exception();
+                } else {
+                  const Center(
+                    child: Text("No warnings"),
+                  );
+                }
+                return const CircularProgressIndicator(
+                  semanticsLabel: "Loading...",
+                  semanticsValue: "Loading...",
+                  color: primaryAncient,
+                );
+              }),
+            ),
           ),
         ],
       ),

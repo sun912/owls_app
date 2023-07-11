@@ -20,18 +20,23 @@ class RequestPlaceProvider with ChangeNotifier {
   bool _isSearched = false;
   String _siteId = "";
   String _spaceId = "";
-  String _floorId = "";
   String _floorImageUrl = "";
+  List<String>? _siteNameList;
+  List<String>? _spaceNameList;
+  List<String>? _floorNameList;
 
   List<SiteData> get getSiteOptionList => _siteOptionList;
   List<SpaceData> get getSpaceOptionList => _spaceOptionList;
   List<FloorData> get getFloorOptionList => _floorOptionList;
   List<WarningItemData>? get getWarningItemList => _warningItemList;
+  List<String>? get getSiteNameList => _siteNameList;
+  List<String>? get getSpaceNameList => _spaceNameList;
+  List<String>? get getFloorNameList => _floorNameList;
+
   String get getFloorImageUrl => _floorImageUrl;
 
   String get getSelectedSiteId => _siteId;
   String get getSelectedSpaceId => _spaceId;
-  String get getSelectedFloorId => _floorId;
 
   SiteData get selectedSite => _selectedSite;
   SpaceData get selectedSpace => _selectedSpace;
@@ -39,6 +44,21 @@ class RequestPlaceProvider with ChangeNotifier {
 
   bool get isSearched => _isSearched;
   List<String> get getSelectedPlaceName => _selectedPlaceName;
+
+  set setSiteNameList(List<String> siteNames) {
+    _siteNameList = siteNames;
+    notifyListeners();
+  }
+
+  set setSpaceNameList(List<String> spaceNames) {
+    _spaceNameList = spaceNames;
+    notifyListeners();
+  }
+
+  set setFloorNameList(List<String> floorNames) {
+    _floorNameList = floorNames;
+    notifyListeners();
+  }
 
   set setWarningItemList(List<WarningItemData> warnings) {
     _warningItemList = warnings;
@@ -90,18 +110,13 @@ class RequestPlaceProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void siteId(String value) {
+  set setSelectedSiteId(String value) {
     _siteId = value;
     notifyListeners();
   }
 
-  void spaceId(String value) {
+  set setSelectedSpaceId(String value) {
     _spaceId = value;
-    notifyListeners();
-  }
-
-  void floorId(String value) {
-    _floorId = value;
     notifyListeners();
   }
 
@@ -131,7 +146,7 @@ class RequestPlaceProvider with ChangeNotifier {
         return _floorOptionList;
       }
     } else if (response.statusCode >= 400) {
-      throw Exception("400 Error");
+      throw Exception("400 Error, $uri");
     } else if (response.statusCode >= 500) {
       throw Exception("500 Error");
     }
