@@ -9,8 +9,6 @@ import 'package:owls_app/data/warningItem_data.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../main.dart';
-
 class WarningItemWidget extends StatefulWidget {
   WarningItemWidget({
     Key? key,
@@ -47,7 +45,7 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
   Future initPrefs() async {
     prefs = await SharedPreferences.getInstance();
     final checkedAlarms = prefs.getStringList(isCheckedWarning);
-    logger.d("checkedAlarms: ${checkedAlarms?.length}");
+
     if (checkedAlarms != null && widget.warningList != null) {
       for (int i = 0; i < widget.warningList!.length; i++) {
         if (checkedAlarms.contains(widget.warningList![i].createDateTime) ==
@@ -78,7 +76,6 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
     widget._showDesktop = _size.width > 1300;
-    // logger.d("provider.siteId: ${provider?.getSelectedSiteId}");
 
     return Padding(
       padding: const EdgeInsets.only(top: 15),

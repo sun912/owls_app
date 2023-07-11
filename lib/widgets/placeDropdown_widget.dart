@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/site_data.dart';
-import '../main.dart';
 
 class PlaceDropdownWidget extends StatefulWidget {
   final List<dynamic> dropdownList;
@@ -192,8 +191,6 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                               .map<String>((value) => value.name)
                               .toList();
                           provider.setSelectedSpaceId = space.id;
-                          logger.d(
-                              "site_id in space block: ${pref?.getString("selectedSiteId")}");
 
                           provider.requestNextOption(
                               baseUrl, widget.childPath ?? "", {
