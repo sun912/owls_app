@@ -15,6 +15,8 @@ import 'package:owls_app/widgets/searchButton_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
+
 class ScaffoldBodyStackWidget extends StatefulWidget {
   ScaffoldBodyStackWidget({Key? key}) : super(key: key);
   late Future<List<WarningItemData>> futureWarnings;
@@ -51,7 +53,9 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   Future initPlace() async {
     pref = await SharedPreferences.getInstance();
     List<String>? prevPlace = pref?.getStringList(placePref);
+
     isChecked = pref?.getBool(isFirstInitPref) ?? false;
+    logger.d("isChecked: $isChecked \n prevPlace: $prevPlace");
 
     if (isChecked!) {
       cachedPlaces = [];
@@ -81,7 +85,9 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
 
   @override
   void initState() {
-    widget.futureWarnings = widget.getWarnings();
+    // widget.futureWarnings = widget.getWarnings();
+    initPlace();
+
     super.initState();
   }
 
@@ -101,8 +107,6 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   @override
   Widget build(BuildContext context) {
     var _size = MediaQuery.of(context).size;
-    initPlace();
-    // logger.d("provider.spaceId: ${provider.getSpaceOptionList.length}");
 
     return SafeArea(
       child: SingleChildScrollView(

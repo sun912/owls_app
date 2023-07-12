@@ -8,6 +8,8 @@ import 'package:owls_app/data/warningItem_data.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
+
 class SearchButtonWidget extends StatefulWidget {
   const SearchButtonWidget({
     Key? key,
@@ -19,6 +21,7 @@ class SearchButtonWidget extends StatefulWidget {
 
 class _SearchButtonWidgetState extends State<SearchButtonWidget> {
   late RequestPlaceProvider provider;
+  SharedPreferences? prefs;
 
   Future<List<WarningItemData>> getWarnings() async {
     Uri uri = Uri.https(baseUrl, "/warning", {});
@@ -34,26 +37,28 @@ class _SearchButtonWidgetState extends State<SearchButtonWidget> {
     }
   }
 
-  Future<void> onSearch() async {
+  void onSearch() async {
     var futureWarnings = getWarnings();
     futureWarnings.then((value) {
       provider.setWarningItemList = value;
+      logger.d(provider.getWarningItemList!.length);
     });
-    var pref = await SharedPreferences.getInstance();
-    var placeList = pref.getStringList(placePref);
-    await pref.setBool(isFirstInitPref, true);
+    prefs = await SharedPreferences.getInstance();
+    var placeList = prefs?.getStringList(placePref);
+    // logger.d("placeList: $placeList");
 
     for (int i = 0; i < 3; i++) {
-      if (placeList!.contains(provider.getSelectedPlaceName[i]) == false) {
+      if (!placeList!.contains(provider.getSelectedPlaceName[i])) {
         placeList[i] = provider.getSelectedPlaceName[i];
       }
     }
-    await pref.setStringList(placePref, placeList!);
+    await prefs?.setStringList(placePref, placeList!);
+    await prefs?.setBool(isFirstInitPref, true);
   }
 
   @override
   Widget build(BuildContext context) {
-    provider = Provider.of<RequestPlaceProvider>(context, listen: false);
+    provider = Provider.of<RequestPlaceProvider>(context);
     return ElevatedButton.icon(
         onPressed: onSearch,
         icon: Icon(Icons.search_rounded),

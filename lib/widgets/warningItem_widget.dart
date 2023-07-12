@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,12 +10,15 @@ import 'package:owls_app/data/warningItem_data.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
+
 class WarningItemWidget extends StatefulWidget {
   WarningItemWidget({
     Key? key,
   }) : super(key: key);
 
-  List<WarningItemData>? warningList;
+  String urlImage = 'owls.png';
+
   late bool _showDesktop;
 
   @override
@@ -22,21 +26,21 @@ class WarningItemWidget extends StatefulWidget {
 }
 
 class _WarningItemWidgetState extends State<WarningItemWidget> {
-  late SharedPreferences prefs;
+  SharedPreferences? prefs;
+  bool? isSearched;
   late Future<List<WarningItemData>> futureWarningList;
-  bool isStart = false;
   RequestPlaceProvider? provider;
+  List<WarningItemData>? warningList;
 
   Future<List<WarningItemData>> getWarnings() async {
     Uri uri = Uri.https(baseUrl, "/warning", {});
     final response = await http.get(uri);
     if (response.statusCode == 200) {
       List<dynamic> alarmItemData = jsonDecode(utf8.decode(response.bodyBytes));
-      List<WarningItemData> alarmList = alarmItemData
+      List<WarningItemData> warningItemDataList = alarmItemData
           .map<WarningItemData>((json) => WarningItemData.fromJson(json))
           .toList();
-
-      return alarmList;
+      return warningItemDataList;
     } else {
       throw Exception("Failed getting alarms");
     }
@@ -44,38 +48,50 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
 
   Future initPrefs() async {
     prefs = await SharedPreferences.getInstance();
-    final checkedAlarms = prefs.getStringList(isCheckedWarning);
 
-    if (checkedAlarms != null && widget.warningList != null) {
-      for (int i = 0; i < widget.warningList!.length; i++) {
-        if (checkedAlarms.contains(widget.warningList![i].createDateTime) ==
-            true) {
+    final checkedAlarms = prefs?.getStringList(isCheckedWarning);
+    logger.d("warningList: $warningList");
+    logger.d("checkedAlarms: $checkedAlarms");
+
+    if (checkedAlarms != null && warningList.isDefinedAndNotNull) {
+      for (int i = 0; i < warningList!.length; i++) {
+        if (checkedAlarms.contains(warningList![i].createDateTime)) {
           setState(() {
-            widget.warningList![i].isChecked = true;
+            warningList![i].isChecked = true;
           });
         }
       }
     } else {
-      await prefs.setStringList(isCheckedWarning, []);
+      await prefs?.setStringList(isCheckedWarning, []);
     }
   }
 
   @override
   void initState() {
     futureWarningList = getWarnings();
-    initPrefs();
-    // futureWarningList.then((value) => widget.warningList = value);
+
+    futureWarningList.then((items) {
+      warningList = items;
+      initPrefs();
+    });
   }
 
   @override
   void didChangeDependencies() {
     provider = Provider.of<RequestPlaceProvider>(context);
+
+    // provider?.setSelectedSiteId = prefs?.getString("selectedSiteId");
+    // logger.d("provider?.getSelectedSiteId: ${provider?.getSelectedSiteId}");
+
+    warningList = provider?.getWarningItemList;
+    // provider?.setWarningItemList = warningList!;
   }
 
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
     widget._showDesktop = _size.width > 1300;
+    isSearched = prefs?.getBool(isFirstInitPref) ?? false;
 
     return Padding(
       padding: const EdgeInsets.only(top: 15),
@@ -87,22 +103,20 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
               ElevatedButton.icon(
                 onPressed: () async {
                   setState(() {
-                    for (int i = 0; i < widget.warningList!.length; i++) {
-                      widget.warningList![i].isChecked = true;
+                    for (int i = 0; i < warningList!.length; i++) {
+                      warningList![i].isChecked = true;
                     }
                   });
-                  final checkedAlarms = prefs.getStringList(isCheckedWarning);
-                  for (int i = 0; i < widget.warningList!.length; i++) {
-                    if (checkedAlarms != null) {
-                      if (checkedAlarms!.contains(
-                              widget.warningList![i].createDateTime) ==
-                          false) {
-                        checkedAlarms!
-                            .add(widget.warningList![i].createDateTime);
+                  final checkedAlarms = prefs?.getStringList(isCheckedWarning);
+                  for (int i = 0; i < warningList!.length; i++) {
+                    if (!checkedAlarms.isNull) {
+                      if (!checkedAlarms!
+                          .contains(warningList![i].createDateTime)) {
+                        checkedAlarms!.add(warningList![i].createDateTime);
                       }
                     }
                   }
-                  prefs.setStringList(isCheckedWarning, checkedAlarms!);
+                  await prefs?.setStringList(isCheckedWarning, checkedAlarms!);
                 },
                 icon: Icon(Icons.mark_email_read_rounded),
                 label: const Text(
@@ -121,51 +135,68 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
           ),
           SizedBox(
             height: _size.height - 150,
-            child: FutureBuilder(
-              future: futureWarningList,
-              builder: ((context, snapshot) {
-                if (snapshot.hasData) {
-                  widget.warningList = snapshot.data!;
-                  final checkedAlarms = prefs.getStringList(isCheckedWarning);
-
-                  if (checkedAlarms != null && widget.warningList != null) {
-                    for (int i = 0; i < widget.warningList!.length; i++) {
-                      if (checkedAlarms
-                          .contains(widget.warningList![i].createDateTime)) {
-                        widget.warningList![i].isChecked = true;
-                      }
-                    }
-                  }
-                  widget.warningList!.retainWhere((element) =>
-                      element.siteId == provider?.getSelectedSiteId);
-                  return ListView.separated(
+            child: isSearched!
+                ? ListView.separated(
                     itemBuilder: (BuildContext context, int index) {
+                      warningList!.retainWhere((element) =>
+                          element.siteId == provider?.getSelectedSiteId);
                       return ItemTile(
                         widget: widget,
-                        itemData: widget.warningList![index],
+                        itemData: warningList![index],
                       );
                     },
                     separatorBuilder: (BuildContext context, int index) =>
                         const Divider(),
-                    itemCount: snapshot.data!.length,
-                  );
-                } else if (snapshot.hasError) {
-                  throw Exception();
-                } else {
-                  const Center(
-                    child: Text("No warnings"),
-                  );
-                }
-                return const CircularProgressIndicator(
-                  semanticsLabel: "Loading...",
-                  semanticsValue: "Loading...",
-                  color: primaryAncient,
-                );
-              }),
-            ),
+                    itemCount: warningList!.length,
+                  )
+                : makeWarningItems(),
           ),
         ],
       ),
+    );
+  }
+
+  FutureBuilder<List<WarningItemData>> makeWarningItems() {
+    return FutureBuilder(
+      future: futureWarningList,
+      builder: ((context, snapshot) {
+        if (snapshot.hasData) {
+          warningList = snapshot.data!;
+          final checkedAlarms = prefs?.getStringList(isCheckedWarning);
+
+          if (checkedAlarms != null && warningList != null) {
+            for (int i = 0; i < warningList!.length; i++) {
+              if (checkedAlarms.contains(warningList![i].createDateTime)) {
+                warningList![i].isChecked = true;
+              }
+            }
+          }
+          warningList!.retainWhere(
+              (element) => element.siteId == provider?.getSelectedSiteId);
+          return ListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              return ItemTile(
+                widget: widget,
+                itemData: warningList![index],
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) =>
+                const Divider(),
+            itemCount: snapshot.data!.length,
+          );
+        } else if (snapshot.hasError) {
+          throw Exception();
+        } else {
+          const Center(
+            child: Text("No warnings"),
+          );
+        }
+        return const CircularProgressIndicator(
+          semanticsLabel: "Loading...",
+          semanticsValue: "Loading...",
+          color: primaryAncient,
+        );
+      }),
     );
   }
 }
@@ -191,26 +222,37 @@ class ItemTile extends StatelessWidget {
               ? Border.all(color: primaryAncient, width: 3)
               : Border.all(color: Colors.amberAccent, width: 3),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              " \u{1F6A8} 발생 구역: ${itemData.siteName}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage('assets/images/${widget.urlImage}'),
+              ),
             ),
-            const Spacer(
-              flex: 1,
-            ),
-            Text(
-              " \u{1F4CD} 발생 대상: ${itemData.tagName} \n ",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  itemData.createDateTime,
-                  style: TextStyle(fontSize: 15),
+                  " \u{1F6A8} 발생 구역: ${itemData.siteName}",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+                const Spacer(
+                  flex: 1,
+                ),
+                Text(
+                  " \u{1F4CD} 발생 대상: ${itemData.tagName} \n ",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      itemData.createDateTime,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -111,10 +111,15 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                     ),
                   ),
                 ),
-                const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 20,
-                )
+                _overlayEntry == null
+                    ? const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 24,
+                      )
+                    : const Icon(
+                        Icons.keyboard_arrow_up_rounded,
+                        size: 24,
+                      ),
               ],
             ),
           ),

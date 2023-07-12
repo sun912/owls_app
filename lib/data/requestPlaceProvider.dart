@@ -110,8 +110,8 @@ class RequestPlaceProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  set setSelectedSiteId(String value) {
-    _siteId = value;
+  set setSelectedSiteId(String? value) {
+    _siteId = value!;
     notifyListeners();
   }
 

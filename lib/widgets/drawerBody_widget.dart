@@ -63,7 +63,7 @@ Widget buildHeader(
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundImage: AssetImage('assets/${urlImage}'),
+            backgroundImage: AssetImage('assets/images/${urlImage}'),
           ),
           SizedBox(
             width: 20,
