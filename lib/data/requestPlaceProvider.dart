@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:js_interop';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -8,9 +9,9 @@ import 'package:owls_app/data/space_data.dart';
 import 'package:owls_app/data/warningItem_data.dart';
 
 class RequestPlaceProvider with ChangeNotifier {
-  List<SiteData> _siteOptionList = [];
-  List<SpaceData> _spaceOptionList = [];
-  List<FloorData> _floorOptionList = [];
+  List<SiteData> _siteOptionList = [SiteData(id: "None", name: "없음")];
+  List<SpaceData> _spaceOptionList = [SpaceData(id: "None", name: "없음")];
+  List<FloorData> _floorOptionList = [FloorData(id: "None", name: "없음")];
   List<String> _selectedPlaceName = List.filled(3, "");
   List<WarningItemData>? _warningItemList;
 
@@ -18,6 +19,7 @@ class RequestPlaceProvider with ChangeNotifier {
   late SpaceData _selectedSpace;
   late FloorData _selectedFloor;
   bool _isSearched = false;
+  bool _isChanged = false;
   String _siteId = "";
   String _spaceId = "";
   String _floorImageUrl = "";
@@ -34,7 +36,6 @@ class RequestPlaceProvider with ChangeNotifier {
   List<String>? get getFloorNameList => _floorNameList;
 
   String get getFloorImageUrl => _floorImageUrl;
-
   String get getSelectedSiteId => _siteId;
   String get getSelectedSpaceId => _spaceId;
 
@@ -43,7 +44,13 @@ class RequestPlaceProvider with ChangeNotifier {
   FloorData get selectedFloor => _selectedFloor;
 
   bool get isSearched => _isSearched;
+  bool get isChanged => _isChanged;
   List<String> get getSelectedPlaceName => _selectedPlaceName;
+
+  set setIsChanged(bool value) {
+    _isChanged = value;
+    notifyListeners();
+  }
 
   set setSiteNameList(List<String> siteNames) {
     _siteNameList = siteNames;
@@ -95,17 +102,17 @@ class RequestPlaceProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  set siteOptionList(List<SiteData> value) {
+  set setSiteOptionList(List<SiteData> value) {
     _siteOptionList = value;
     notifyListeners();
   }
 
-  set spaceOptionList(List<SpaceData> value) {
+  set setSpaceOptionList(List<SpaceData> value) {
     _spaceOptionList = value;
     notifyListeners();
   }
 
-  set floorOptionList(List<FloorData> value) {
+  set setFloorOptionList(List<FloorData> value) {
     _floorOptionList = value;
     notifyListeners();
   }
@@ -125,7 +132,8 @@ class RequestPlaceProvider with ChangeNotifier {
     Uri uri = Uri.https(baseUrl, childPath, param);
     var response = await http.get(uri);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 &&
+        response.contentLength.isDefinedAndNotNull) {
       List<dynamic> parsedJson = jsonDecode(utf8.decode(response.bodyBytes));
 
       if (childPath == "/site") {

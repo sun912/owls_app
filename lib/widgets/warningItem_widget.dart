@@ -82,8 +82,13 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
 
     // provider?.setSelectedSiteId = prefs?.getString("selectedSiteId");
     // logger.d("provider?.getSelectedSiteId: ${provider?.getSelectedSiteId}");
-
     warningList = provider?.getWarningItemList;
+
+    // for(int i=0;i<provider!.getWarningItemList!.length;i++) {
+    //   if(provider!.getWarningItemList[i].siteId)
+    // }
+    // logger.d(warningList);
+
     // provider?.setWarningItemList = warningList!;
   }
 
@@ -139,7 +144,7 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
                 ? ListView.separated(
                     itemBuilder: (BuildContext context, int index) {
                       warningList!.retainWhere((element) =>
-                          element.siteId == provider?.getSelectedSiteId);
+                          element.siteId == prefs?.getString("selectedSiteId"));
                       return ItemTile(
                         widget: widget,
                         itemData: warningList![index],
@@ -147,7 +152,7 @@ class _WarningItemWidgetState extends State<WarningItemWidget> {
                     },
                     separatorBuilder: (BuildContext context, int index) =>
                         const Divider(),
-                    itemCount: warningList!.length,
+                    itemCount: warningList?.length ?? 0,
                   )
                 : makeWarningItems(),
           ),

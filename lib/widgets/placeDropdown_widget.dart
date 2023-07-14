@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:owls_app/constants.dart';
+import 'package:owls_app/data/floor_data.dart';
 import 'package:owls_app/data/owlsTheme_data.dart';
 import 'package:owls_app/data/requestPlaceProvider.dart';
+import 'package:owls_app/data/space_data.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../data/site_data.dart';
 
 class PlaceDropdownWidget extends StatefulWidget {
   final List<dynamic> dropdownList;
@@ -28,12 +28,15 @@ class PlaceDropdownWidget extends StatefulWidget {
 
 class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
   late String _dropdownValue;
-  late SharedPreferences pref;
+  late SharedPreferences prefs;
   late RequestPlaceProvider provider;
 
   bool isHovered = false;
+
   @override
-  void initState() {}
+  void initState() {
+    _dropdownValue = widget.initValue;
+  }
 
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
@@ -61,9 +64,9 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
 
   @override
   Future<void> didChangeDependencies() async {
-    provider = Provider.of<RequestPlaceProvider>(context, listen: false);
-    _dropdownValue = widget.initValue;
-    pref = await SharedPreferences.getInstance();
+    provider = Provider.of<RequestPlaceProvider>(context);
+
+    prefs = await SharedPreferences.getInstance();
     // pref = await initPlace();
   }
 
@@ -162,12 +165,15 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                       pressedOpacity: 0.5,
                       minSize: 1,
                       onPressed: () async {
-                        setState(() {
-                          _dropdownValue =
-                              widget.dropdownList.elementAt(index).name;
-                        });
+                        // setState(() {
+                        //   _dropdownValue =
+                        //       widget.dropdownList.elementAt(index).name;
+                        // });
+                        _dropdownValue =
+                            widget.dropdownList.elementAt(index).name;
 
-                        final checkedPlace = pref.getStringList(placePref);
+                        final checkedPlaceListPrefs =
+                            prefs.getStringList(placePref);
 
                         if (widget.childPath == "/space") {
                           var site = widget.dropdownList.elementAt(index);
@@ -176,19 +182,32 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                               .toList();
 
                           provider.setSelectedSiteId = site.id;
-                          provider.requestNextOption(baseUrl,
-                              widget.childPath ?? "", {"site_id": site.id});
-                          // provider.selectedSite = site;
-                          provider.setSelectedPlaceName(0, site.name);
-                          provider.siteOptionList =
-                              widget.dropdownList as List<SiteData>;
-
-                          if (checkedPlace!.isNotEmpty && site.name != null) {
-                            if (checkedPlace.contains(site.name) == false) {
-                              checkedPlace?[0] = site.name;
+                          var responseNextOption = provider.requestNextOption(
+                              baseUrl,
+                              widget.childPath ?? "",
+                              {"site_id": site.id});
+                          responseNextOption.then((spaceList) {
+                            if (spaceList != null) {
+                              provider.setSpaceOptionList =
+                                  spaceList as List<SpaceData>;
+                            } else {
+                              provider.setSpaceOptionList = [
+                                SpaceData(id: "none", name: "없음")
+                              ];
                             }
+                          });
+                          provider.setSelectedPlaceName(0, site.name);
+
+                          if (checkedPlaceListPrefs!.isNotEmpty &&
+                              site.name != null) {
+                            checkedPlaceListPrefs?[0] = site.name;
                           }
-                          pref?.setString("selectedSiteId", site.id);
+                          if (prefs?.getString("selectedSiteId") == null ||
+                              prefs?.getString("selectedSiteId") != site.id) {
+                            provider.setIsChanged = true;
+                            // await prefs?.setString("selectedSiteId", site.id);
+                          }
+                          await prefs?.setString("selectedSiteId", site.id);
                         } else if (widget.childPath == "/floor") {
                           var space = widget.dropdownList.elementAt(index);
 
@@ -197,26 +216,44 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                               .toList();
                           provider.setSelectedSpaceId = space.id;
 
-                          provider.requestNextOption(
+                          var responseNextOption = provider.requestNextOption(
                               baseUrl, widget.childPath ?? "", {
-                            "site_id": pref?.getString("selectedSiteId"),
-                            "space_id": provider.getSelectedSpaceId,
+                            "site_id": prefs?.getString("selectedSiteId"),
+                            "space_id": space.id,
+                          });
+                          responseNextOption.then((floorList) {
+                            if (floorList != null) {
+                              provider.setFloorOptionList =
+                                  floorList as List<FloorData>;
+                            } else {
+                              provider.setFloorOptionList = [
+                                FloorData(name: "없음", id: "none")
+                              ];
+                            }
                           });
                           // provider.selectedSpace = space;
                           provider.setSelectedPlaceName(1, space.name);
 
-                          if (checkedPlace!.isNotEmpty) {
-                            if (checkedPlace.contains(space.name) == false) {
-                              checkedPlace?[1] = space.name;
+                          if (checkedPlaceListPrefs!.isNotEmpty) {
+                            if (checkedPlaceListPrefs.contains(space.name) ==
+                                false) {
+                              checkedPlaceListPrefs?[1] = space.name;
                             }
                           }
+
                           List<String> spaceList = provider.getSpaceOptionList
                               .map((element) => jsonEncode(element.toJson()))
                               .toList();
                           if (spaceList.isNotEmpty) {
-                            pref?.setStringList("spaceList", spaceList);
+                            prefs?.setStringList("spaceList", spaceList);
                           }
-                          pref?.setString("selectedSpaceId", space.id);
+                          prefs?.setString("selectedSpaceId", space.id);
+
+                          if (prefs?.getString("selectedSpaceId") == null ||
+                              prefs?.getString("selectedSpaceId") != space.id) {
+                            provider.setIsChanged = true;
+                          }
+                          await prefs?.setString("selectedSpaceId", space.id);
                         } else {
                           var floor = widget.dropdownList.elementAt(index);
                           provider.setFloorNameList = widget.dropdownList
@@ -226,23 +263,29 @@ class _PlaceDropdownWidget extends State<PlaceDropdownWidget> {
                                   floor.floorImageUrl &&
                               floor.floorImageUrl != null) {
                             provider.floorImageUrl = floor.floorImageUrl;
+                          } else {
+                            provider.floorImageUrl = "";
+                          }
+                          provider.setSelectedPlaceName(2, floor.name);
 
-                            // provider.selectedFloor = floor;
-                            provider.setSelectedPlaceName(2, floor.name);
+                          if (prefs?.getString("selectedFloorId") == null ||
+                              prefs?.getString("selectedFloorId") != floor.id) {
+                            provider.setIsChanged = true;
                           }
 
-                          if (checkedPlace!.isNotEmpty) {
-                            if (checkedPlace.contains(floor.name) == false) {
-                              checkedPlace?[2] = floor.name;
+                          if (checkedPlaceListPrefs!.isNotEmpty) {
+                            if (checkedPlaceListPrefs.contains(floor.name) ==
+                                false) {
+                              checkedPlaceListPrefs?[2] = floor.name;
                             }
                           }
                           List<String> floorList = provider.getFloorOptionList
                               .map((element) => jsonEncode(element.toJson()))
                               .toList();
                           if (floorList.isNotEmpty) {
-                            pref?.setStringList("floorList", floorList);
+                            prefs?.setStringList("floorList", floorList);
                           }
-                          pref?.setString("selectedFloorId", floor.id);
+                          await prefs?.setString("selectedFloorId", floor.id);
                         }
 
                         _removeOverlay();

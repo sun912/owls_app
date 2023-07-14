@@ -8,8 +8,6 @@ import 'package:owls_app/data/warningItem_data.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../main.dart';
-
 class SearchButtonWidget extends StatefulWidget {
   const SearchButtonWidget({
     Key? key,
@@ -39,20 +37,20 @@ class _SearchButtonWidgetState extends State<SearchButtonWidget> {
 
   void onSearch() async {
     var futureWarnings = getWarnings();
-    futureWarnings.then((value) {
-      provider.setWarningItemList = value;
-      logger.d(provider.getWarningItemList!.length);
+    futureWarnings.then((warningList) {
+      provider.setWarningItemList = warningList;
+      // logger.d(provider.getWarningItemList!.length);
     });
     prefs = await SharedPreferences.getInstance();
-    var placeList = prefs?.getStringList(placePref);
-    // logger.d("placeList: $placeList");
+    var placeNameList = prefs?.getStringList(placePref);
+    // logger.d("placeNameList: $placeNameList");
 
     for (int i = 0; i < 3; i++) {
-      if (!placeList!.contains(provider.getSelectedPlaceName[i])) {
-        placeList[i] = provider.getSelectedPlaceName[i];
+      if (!placeNameList!.contains(provider.getSelectedPlaceName[i])) {
+        placeNameList[i] = provider.getSelectedPlaceName[i];
       }
     }
-    await prefs?.setStringList(placePref, placeList!);
+    await prefs?.setStringList(placePref, placeNameList!);
     await prefs?.setBool(isFirstInitPref, true);
   }
 

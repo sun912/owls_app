@@ -48,18 +48,18 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   List<SiteData>? selectedSiteList;
   List<SpaceData>? selectedSpaceList;
   List<FloorData>? selectedFloorList;
-  List<String> cachedPlaces = [];
+  List<String> cachedPlaceName = [];
 
   Future initPlace() async {
     pref = await SharedPreferences.getInstance();
-    List<String>? prevPlace = pref?.getStringList(placePref);
+    List<String>? prevPlaceName = pref?.getStringList(placePref);
 
     isChecked = pref?.getBool(isFirstInitPref) ?? false;
-    logger.d("isChecked: $isChecked \n prevPlace: $prevPlace");
+    logger.d("isChecked: $isChecked \n prevPlaceName: $prevPlaceName");
 
     if (isChecked!) {
-      cachedPlaces = [];
-      cachedPlaces.addAll(prevPlace!);
+      cachedPlaceName = [];
+      cachedPlaceName.addAll(prevPlaceName!);
       List<String>? siteListString = pref?.getStringList('siteList');
       List<String>? spaceListString = pref?.getStringList('spaceList');
       List<String>? floorListString = pref?.getStringList('floorList');
@@ -79,15 +79,15 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
       // logger.d("selected Space List: ${selectedSpaceList}");
     } else {
       await pref?.setStringList(placePref, ["", "", ""]);
-      cachedPlaces = pref!.getStringList(placePref)!;
+      cachedPlaceName = pref!.getStringList(placePref)!;
     }
+    logger.d("cachedPlaces: $cachedPlaceName");
+    if (provider.isChanged) {}
   }
 
   @override
   void initState() {
-    // widget.futureWarnings = widget.getWarnings();
     initPlace();
-
     super.initState();
   }
 
@@ -107,7 +107,6 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
   @override
   Widget build(BuildContext context) {
     var _size = MediaQuery.of(context).size;
-
     return SafeArea(
       child: SingleChildScrollView(
         child: Row(
@@ -145,24 +144,25 @@ class _ScaffoldBodyStackWidgetState extends State<ScaffoldBodyStackWidget> {
                     child: Row(
                       children: [
                         PlaceDropdownWidget(
-                          dropdownList: isChecked!
+                          dropdownList: provider.isChanged!
                               ? selectedSiteList!
                               : provider.getSiteOptionList,
-                          initValue: isChecked! ? cachedPlaces[0] : "지역 선택",
+                          initValue: isChecked! ? cachedPlaceName[0] : "지역 선택",
                           childPath: "/space",
                         ),
                         PlaceDropdownWidget(
-                            dropdownList: isChecked!
-                                ? selectedSpaceList!
-                                : provider.getSpaceOptionList,
-                            initValue: isChecked! ? cachedPlaces[1] : "공간 선택",
+                            dropdownList: provider.isChanged!
+                                ? provider.getSpaceOptionList
+                                : selectedSpaceList!,
+                            initValue:
+                                isChecked! ? cachedPlaceName[1] : "공간 선택",
                             childPath: "/floor"),
                         PlaceDropdownWidget(
-                            dropdownList: isChecked!
-                                ? selectedFloorList!
-                                : provider.getFloorOptionList,
+                            dropdownList: provider.isChanged!
+                                ? provider.getFloorOptionList
+                                : selectedFloorList!,
                             initValue:
-                                isChecked! ? cachedPlaces[2] : "세부 공간 선택",
+                                isChecked! ? cachedPlaceName[2] : "세부 공간 선택",
                             childPath: ""),
                         SearchButtonWidget(),
                       ],
